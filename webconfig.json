@@ -1,0 +1,4 @@
+{
+    "blogdir": "./blog/",
+    "blogFileNamePattern": "yyyy-MM-dd-title"
+}
