@@ -7,28 +7,56 @@ var app = express();
 
 var webconfig = require('./webconfig');
 
+/** @Blog class
+@param filename {string}
+@return {Blog} the filename must 
+match the regax or the constructor 
+will return a instance with undefined title
+**/
+function Blog(arg, argType){
+  if(argType === 'filename')
+  {
+    var regPattern = /^[0-9]{4}-[0-9]{2}-[0-9]{2}-.{1,}\.md$/;
+    if (arg!=null && arg.search(regPattern) !== -1) {
+      this.dateStr = arg.substring(0, 10);
+      this.title = arg.substring(11, arg.lastIndexOf('.'));
+      this.blogdate = new Date();
+      this.blogdate.setTime(Date.parse(this.dateStr));
+      this.dateYear = this.blogdate.getFullYear();
+      this.dateMonth = _.str.pad(this.blogdate.getMonth() + 1, 2, '0');
+      this.dateDate = this.blogdate.getDate();
+      this.fileName = arg;
+    } else {
+      this.title = undefined;
+    }
+  } else if (argType == 'reqParams') {
+    this.dateYear = arg.year;
+    this.dateMonth = arg.month;
+    this.dateDate = arg.day;
+    this.title = arg.title;
+    this.blogdir = webconfig.blogdir;
+    this.fileName = _.str.sprintf('%(blogdir)s/%(dateYear)s-%(dateMonth)s-%(dateDate)s-%(title)s.md', this);
+  }
+}
+
 /** @method getBlogList
-@param files {array} array of file names(no path, and in specific form like '2014-01-10-blogname.md')
-@return {array} array of BlogItem{dateStr, title, blogdate, dateYear, dateMonth, dateDate}
+@param files {array} array of file names(
+no path, and in specific form like 
+'2014-01-10-blogname.md')
+@return {array} array of 
+BlogItem{dateStr, title, blogdate, dateYear, 
+dateMonth, dateDate}
 **/
 function getBlogList(files, callback) {
   try {
     var blogList = [];
     console.log(files);
     files.forEach(function (filename) {
-      var regPattern = /^[0-9]{4}-[0-1][0-9]-[0-9]{2}-.{1,}\.md$/;
-      if (filename.search(regPattern) !== -1) {
-        var blogItem = {};
-        blogItem.dateStr = filename.substring(0, 10);
-        blogItem.title = filename.substring(11, filename.lastIndexOf('.'));
-        blogItem.blogdate = new Date();
-        blogItem.blogdate.setTime(Date.parse(blogItem.dateStr));
-        blogItem.dateYear = blogItem.blogdate.getFullYear();
-        blogItem.dateMonth = _.str.pad(blogItem.blogdate.getMonth() + 1, 2, '0');
-        blogItem.dateDate = blogItem.blogdate.getDate();
-        blogList.push(blogItem);
+      var blogItem = new Blog(filename, 'filename');
+      if (blogItem.title === undefined) {
+        console.log(filename + " nok");
       } else {
-        console.log('nok', filename);
+        blogList.push(blogItem);
       }
     });
     return callback(null, blogList);
@@ -37,11 +65,15 @@ function getBlogList(files, callback) {
   }
 }
 
+/* mw for all request, just for logging
+*/
 app.use(function (req, res, next) {
   console.log(req.url);
   next();
 });
 
+/* router for blog reading
+*/
 var blogRouter = express.Router();
 
 blogRouter.use(function (req, res, next) {
@@ -49,21 +81,14 @@ blogRouter.use(function (req, res, next) {
 });
 
 blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
-  console.log(req.params.title);
-  var filename = 
-    './blog/' + req.params.year + '-' + req.params.month + '-' + req.params.day + '-' +
-    req.params.title + '.md';
-  console.log(filename);
-  fs.exists(filename, function (exists) {
+  var blog = new Blog(req.params, 'reqParams');
+  fs.exists(blog.fileName, function (exists) {
     if (exists) {
-      fs.readFile(filename, 'utf-8', function (err, data) {
-        var start = new Date();
+      fs.readFile(blog.fileName, 'utf-8', function (err, data) {
         res.send(markdown.toHTML(data));
-        var end = new Date();
-        console.log(end - start);
       });
     } else {
-      res.send(filename + 'Page Not Found');
+      res.send(blog.fileName + 'Page Not Found');
     }
   });
 });
