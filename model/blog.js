@@ -28,8 +28,7 @@ function Blog(arg, argType) {
     this.dateMonth = arg.month;
     this.dateDate = arg.day;
     this.title = arg.title;
-    this.blogdir = webconfig.blogdir;
-    this.fileName = _.str.sprintf('%(blogdir)s/%(dateYear)s-%(dateMonth)s-%(dateDate)s-%(title)s.md', this);
+    this.fileName = _.str.sprintf('%(dateYear)s-%(dateMonth)s-%(dateDate)s-%(title)s.md', this);
   }
 }
 

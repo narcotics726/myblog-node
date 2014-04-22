@@ -1,4 +1,5 @@
 var express = require('express');
+var path = require('path');
 
 var Blog = require('./model/blog');
 var blogController = require('./controller/blogController');
@@ -41,4 +42,4 @@ app.use(function (err, req, res, next) {
   res.send(500, 'Internal Error');
 });
 
-app.listen(3000, '0.0.0.0');
+app.listen(webconfig.port);

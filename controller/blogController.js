@@ -3,6 +3,8 @@ var _ = require('underscore');
 _.str = require('underscore.string');
 var markdown = require('markdown').markdown;
 var fs = require('fs');
+var path = require('path');
+var webconfig = require('../webconfig');
 
 var Blog = require('../model/blog');
 
@@ -14,9 +16,10 @@ blogRouter.use(function (req, res, next) {
 
 blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
   var blog = new Blog(req.params, 'reqParams');
-  fs.exists(blog.fileName, function (exists) {
+  var filePath = path.resolve(webconfig.blogdir, blog.fileName);
+  fs.exists(filePath, function (exists) {
     if (exists) {
-      fs.readFile(blog.fileName, 'utf-8', function (err, data) {
+      fs.readFile(filePath, 'utf-8', function (err, data) {
         res.send(markdown.toHTML(data));
       });
     } else {
@@ -44,8 +47,8 @@ no path, and in specific form like
 BlogItem{dateStr, title, blogdate, dateYear, 
 dateMonth, dateDate}
 **/
-function getBlogList(blogUrl, callback) {
-  fs.readdir(blogUrl, function (err, files) {
+function getBlogList(blogDir, callback) {
+  fs.readdir(blogDir, function (err, files) {
     if (files && files.length) {
       try {
         var blogList = [];
