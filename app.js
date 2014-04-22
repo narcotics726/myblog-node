@@ -1,6 +1,6 @@
 var express = require('express');
 
-var Blog = require('./model/Blog');
+var Blog = require('./model/blog');
 var blogController = require('./controller/blogController');
 var app = express();
 

@@ -4,7 +4,7 @@ _.str = require('underscore.string');
 var markdown = require('markdown').markdown;
 var fs = require('fs');
 
-var Blog = require('../model/Blog');
+var Blog = require('../model/blog');
 
 var blogRouter = express.Router();
 
