@@ -1,0 +1,9 @@
+h1  Hello World
+- if (blogs && blogs.length)
+  ul
+    - blogs.forEach(function (item) {
+      li
+        a(href= item.url)
+          = item.title
+        p(style='display: inline; margin-left: 30px;')= item.dateStr
+    - })

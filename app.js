@@ -4,8 +4,13 @@ var path = require('path');
 var Blog = require('./model/blog');
 var blogController = require('./controller/blogController');
 var app = express();
-
 var webconfig = require('./webconfig');
+app.engine('jade', require('jade').__express);
+
+app.set('views', webconfig.viewdir);
+app.set('view engine', 'jade');
+
+app.use(express.static(webconfig.publicdir));
 
 /* mw for all request, just for logging
 */
@@ -18,7 +23,7 @@ app.use(function (req, res, next) {
 */
 app.use('/blog', blogController);
 
-app.use('/', function (req, res, next) {
+app.get('/', function (req, res, next) {
   blogController.getBlogList(webconfig.blogdir, function (err, blogList) {
     if (err) {
       next(err);
@@ -26,15 +31,18 @@ app.use('/', function (req, res, next) {
       var html = '';
       if (blogList && blogList.length) {
         blogList.forEach(function (blog) {
-          var url = blogController.getBlogUrl(blog);
-          html += '<a href="' + url + '">' + blog.title + '</a><br />';
+          blog.url = blogController.getBlogUrl(blog);
         });
-        res.send(html);
+        res.render('home', { blogs: blogList });
       } else {
         res.send('No Blogs Found.');
       }
     }
   });
+});
+
+app.get('*', function (req, res, next) {
+  res.send(404, 'Oops, this page didn\'t exist');
 });
 
 app.use(function (err, req, res, next) {

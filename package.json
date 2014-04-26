@@ -5,6 +5,7 @@
         "express": "*",
         "markdown": "*",
         "underscore": "*",
-        "underscore.string": "*"
+        "underscore.string": "*",
+        "jade": "*"
     }
 }
