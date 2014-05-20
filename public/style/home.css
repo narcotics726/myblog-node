@@ -1,0 +1,19 @@
+html{
+    border-top: 12px solid #000;
+}
+
+body{
+    margin: 0 auto;
+    max-width: 500px;
+    min-height: 100%;
+}
+
+h1{
+    margin-top: 80px;
+    font-family: 'Permanent Marker', 'cursive';
+    font-size: 60px;
+}
+
+li{
+    margin-bottom: 30px;
+}
