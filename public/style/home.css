@@ -6,6 +6,7 @@ body{
     margin: 0 auto;
     max-width: 500px;
     min-height: 100%;
+    line-height: 200%;
 }
 
 h1{
@@ -17,3 +18,4 @@ h1{
 li{
     margin-bottom: 30px;
 }
+

@@ -1,0 +1,30 @@
+html{
+    border-top: 12px solid #000;
+}
+
+body{
+    margin: 0 auto;
+    max-width: 800px;
+    min-height: 100%;
+    line-height: 200%;
+}
+
+h1{
+    margin-top: 80px;
+    font-size: 40px;
+}
+
+li{
+    margin-bottom: 30px;
+}
+
+blockquote{
+	background-color: #f8f8f8;
+	border-left: 5px solid black;
+	margin: auto;
+}
+
+blockquote p{
+	margin-left: 20px;
+	font-size: 12px;
+}

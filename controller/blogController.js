@@ -1,7 +1,15 @@
 var express = require('express');
 var _ = require('underscore');
 _.str = require('underscore.string');
-var markdown = require('markdown').markdown;
+var marked = require('marked');
+var pygmentize = require('pygmentize-bundled');
+marked.setOptions({
+  highlight: function (code, lang, callback) {
+    require('pygmentize-bundled')({ lang: lang, format: 'html' }, code, function (err, result) {
+      callback(err, result.toString());
+    });
+  }
+});
 var fs = require('fs');
 var path = require('path');
 var webconfig = require('../webconfig');
@@ -20,7 +28,12 @@ blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
   fs.exists(filePath, function (exists) {
     if (exists) {
       fs.readFile(filePath, 'utf-8', function (err, data) {
-        res.send(markdown.toHTML(data));
+        marked(data, function (err, content) {
+          if (err) {
+            throw err;
+          }
+          res.render('blog', { blog: { title: blog.title, content: content} });
+        });
       });
     } else {
       next();

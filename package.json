@@ -3,9 +3,10 @@
     "version": "0.0.1",
     "dependencies":{
         "express": "*",
-        "markdown": "*",
         "underscore": "*",
         "underscore.string": "*",
-        "jade": "*"
+        "jade": "*",
+        "pygmentize-bundled": "*",
+        "marked": "*"
     }
 }
