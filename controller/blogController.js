@@ -6,8 +6,6 @@ _.str = require('underscore.string');
 var fs = require('fs');
 var path = require('path');
 
-var lineReader = require('line-reader');
-
 var Blog = require('../model/blog');
 
 var fileHandler = require('../util/fileHandler');

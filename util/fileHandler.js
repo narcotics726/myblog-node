@@ -34,6 +34,11 @@ function getBlogContent(blog, callback) {
   console.log(fileNameWithOutExt);
   var cachedHtmlFileName = fileNameWithOutExt + '.html';
   var cachedHtmlFilePath = path.resolve(webconfig.blogCacheDir, cachedHtmlFileName);
+  fs.exists(webconfig.blogCacheDir, function (existsDir) {
+    if (!existsDir) {
+      fs.mkdir(webconfig.blogCacheDir);
+    }
+  });
   fs.exists(cachedHtmlFilePath, function (existsCache) {
     if (existsCache) {
       console.log('cache file found');
