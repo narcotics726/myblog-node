@@ -19,3 +19,11 @@ li{
     margin-bottom: 30px;
 }
 
+.caption:link {color: black}     /* 未访问的链接 */
+.caption:visited {color: black}  /* 已访问的链接 */
+.caption:hover {color: black}    /* 鼠标移动到链接上 */
+.caption:active {color: black}   /* 选定的链接 */
+.caption{
+    text-decoration:none;    
+    font-size: 65px;
+}

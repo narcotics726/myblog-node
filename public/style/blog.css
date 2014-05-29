@@ -7,6 +7,16 @@ html{
     -ms-text-size-adjust: 100%; 
 }
 
+.caption:link {color: black}   
+.caption:visited {color: black}
+.caption:hover {color: black}  
+.caption:active {color: black} 
+.caption{
+    text-decoration:none;
+    font-family: 'Permanent Marker', 'cursive'; 
+    font-size: 65px;
+}
+
 body{
   color:#444;
   font-family:Georgia, Palatino, 'Palatino Linotype', Times, 'Times New Roman',
@@ -17,6 +27,7 @@ body{
   width: 45em;
   margin: 10px auto;
   padding: 1em;
+  line-height: 200%;
 }
 
 a{ color: #0645ad; text-decoration:none;}

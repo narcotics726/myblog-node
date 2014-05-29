@@ -1,7 +1,9 @@
 link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Permanent+Marker')
 link(rel='stylesheet', href='/public/style/home.css')
 
-h1  Hello World
+a(href='/', class='caption')
+  h1(class='caption') Hello World
+
 - if (blogs && blogs.length)
   ul
     - blogs.forEach(function (item) {

@@ -22,7 +22,11 @@ blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
     if (err) {
       next(err);
     } else {
-      res.render('blog', { blog: { title: blog.title, content: content} });
+      if (content && content.length) {
+        res.render('blog', { blog: { title: blog.title, content: content} });
+      } else {
+        next();
+      }
     }
   });
 });

@@ -1,0 +1,281 @@
+<hr>
+<ul>
+<li>0.前言</li>
+<li>1.<a href="#1">需求</a></li>
+<li>2.<a href="#2">技术选型</a></li>
+<li>3.<a href="#3">正文，动手</a><ul>
+<li>3.1 <a href="#3-1">Hello, Express</a></li>
+<li>3.2 <a href="#3-2">Express 中的 Routing</a></li>
+<li>3.3 <a href="#3-3">认识一下 Middleware</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="0-">0. 前言</h2>
+<p>这个系列的文章可以看作个人项目blog-node的记录，同时也算一个nodejs 进阶版hello world范例。希望可以为像我一样想快速入门nodejs的大家一点小小的方向。自己也是刚刚开始进入nodejs世界，因此文中或有一些初级的，入门的，甚至可能是错误的知识与观点，还请不吝指正。</p>
+<p>因为是“进阶版”hello world，因此本文会跳过一些我认为即使对我这样的新手来说也非常基础的地方而略过不提，比如如何搭建环境，如何使用npm等等，网上关于这些的文章已经足够多了。</p>
+<p>所以，如果你对Nodejs还一无所知，强烈推荐这本小书：<a href="http://www.nodebeginner.org/index-zh-cn.html">Node入门</a>，篇幅不长但讲解详细而又浅显易懂。相信是个极好的学习开端。</p>
+<p>最后，文章内的所有代码几乎都可以在<a href="https://github.com/narcotics726/myblog-node">本项目</a>中找到，或许偶有为了讲解方便而略作修改之处。欢迎任何的意见和批评~</p>
+<hr>
+<p><a name="1"><br></a></p>
+<h2 id="1-">1. 需求</h2>
+<p>不知道大家有没有看过<a href="http://tom.preston-werner.com/2008/11/17/blogging-like-a-hacker.html">像黑客一样写博客</a>或是类似的介绍利用<a href="https://github.com/jekyll/jekyll">Jekyll</a>来进行博客写作的文章？本着不折腾会死不造轮子不幸福的码农精神。今天来试试从头搭建一个类jekyll的静态网站。这个网站应该至少能满足以下需求：</p>
+<ol>
+<li>自动解析markdown文件成html</li>
+<li>根据一定的文件名规则生成对应的url</li>
+<li>如果能根据文章的Tag/Category或者其他任何自定义的属性自动分类就更好了</li>
+<li>...暂时还没想到~</li>
+</ol>
+<p>如果您曾尝试过jekyll或类似系统，或许就会发现，以上列出的基本就是一个minimal jekyll website。 那么, 接下来分析一下如何实现。</p>
+<hr>
+<p><a name="2"><br></a></p>
+<h2 id="2-">2. 技术选型</h2>
+<p>不消说我们要开发的是一个网站。基础技术也已确定NodeJs不做他选（题目就是这个嘛）。</p>
+<p>时下火热的 <a href="http://www.mean.io/">MEAN</a> Web-Dev Stack必定值得一试。不过根据初期需求来看，静态博客暂时不需要引入数据库或复杂的页面交互结构，为了快速实现一个原型，目前仅需 M.E.A.N 中的 E[xpress] ＋ N[odejs] 就很足够了。</p>
+<p>关于<a href="http://expressjs.com/">Express</a>或是Nodejs的基础知识，例如开发环境搭建什么的，这里就不再重复。我自己则是在Mac/Ubuntu/Windows下同步进行后文中的所有工作，基本就是Nodejs环境 + SublimeText/Vim + Git（跨平台的软件就是一个赞）通吃所有。</p>
+<p>直接进入主题。</p>
+<hr>
+<p><a name="3"><br></a></p>
+<h2 id="3-">3. 动手</h2>
+<p>撩起袖子大干一场之前，先给之后的工作做一个简单的分解和排序：细化一下上文中的需求列表，我们的第一个目标就是把文章显示到页面上！</p>
+<p>...确实简单了点儿，不过由浅入深嘛。借此机会了解一下Nodejs与Express的基本知识。
+<a name="3-1"><br></a></p>
+<h3 id="3-1-hello-express">3-1 Hello, Express</h3>
+<p>新建项目</p>
+<pre><code><div class="highlight"><pre><span class="o">|--</span><span class="nx">myblog</span><span class="o">-</span><span class="nx">node</span>
+<span class="o">|</span>    <span class="o">|--</span><span class="nx">app</span><span class="p">.</span><span class="nx">js</span>
+<span class="o">|</span>    <span class="o">|--</span><span class="kr">package</span><span class="p">.</span><span class="nx">json</span>
+</pre></div>
+
+</code></pre><p>package.json为我们提供了一个统一控制包依赖关系以及程序自描述的入口，唔，你大概可以把他想像成C#项目中sln/csproj文件之类的东西（=。=暴露了，其实我是个.NET农民）。内容如下：</p>
+<pre><code class="lang-json"><div class="highlight"><pre>    <span class="p">{</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;my-blog&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0.1&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;NarK&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;dependencies&quot;</span><span class="p">:{</span>
+            <span class="nt">&quot;express&quot;</span><span class="p">:</span> <span class="s2">&quot;4.x&quot;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+</pre></div>
+
+</code></pre>
+<p>内容很清楚不解释，但在<a href="https://www.npmjs.org/doc/json.html">这里</a>可以看到package.json所能做的远不止这些，我们以后再谈。保存后运行<code>npm install</code>等待依赖包安装完成。</p>
+<p>app.js则是我们今后的主程序文件。</p>
+<pre><code class="lang-js"><div class="highlight"><pre>    <span class="c1">//app.js</span>
+
+    <span class="kd">var</span> <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+
+    <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s1">&#39;hello world&#39;</span><span class="p">);</span>
+    <span class="p">});</span>
+
+    <span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+</pre></div>
+
+</code></pre>
+<p>以上代码直接从<a href="http://expressjs.com/4x/api.html">Express官网API Doc</a>复制，顺便一说，本项目采用目前最新的4.x版本。</p>
+<p>这样实现了一个express下的最简server，打开浏览器访问 <a href="http://localhost:3000">http://localhost:3000</a> 即可见效。</p>
+<p>OK，那么本文到此为止。</p>
+<p>...</p>
+<p>...</p>
+<p>...</p>
+<p>...开个玩笑。从上述代码可见，Express中的<a href="http://expressjs.com/4x/api.html#app.VERB">路由控制</a>不需要我们再去手动解析request，然后苦哈哈的写上一句又一句<code>if (method === &#39;POST&#39; &amp;&amp; path === &#39;/home&#39;)</code> 之类的判断。取而代之的是相当形象而易写的 <code>app.verb(path, callback)</code>方法。verb 可以是 post，get 等等。</p>
+<p>而在请求处理方法中，<code>res.send(content)</code>也提供了一个简单的响应方式，如果不显示指定<code>Content-Type</code>，express会根据send方法的参数自动推定响应类型，列个表格出来：</p>
+<pre><code><div class="highlight"><pre><span class="nx">Data</span> <span class="nx">Type</span>       <span class="nx">Content</span><span class="o">-</span><span class="nx">Type</span>
+<span class="nx">Buffer</span>          <span class="nx">application</span><span class="o">/</span><span class="nx">octet</span><span class="o">-</span><span class="nx">stream</span>
+<span class="nb">String</span>          <span class="nx">text</span><span class="o">/</span><span class="nx">html</span>
+<span class="nb">Array</span><span class="o">/</span><span class="nb">Object</span>    <span class="nx">Json</span> <span class="nx">representation</span>
+<span class="nb">Number</span>          <span class="k">return</span> <span class="nx">a</span> <span class="nx">respond</span> <span class="nx">text</span><span class="o">:</span> <span class="mi">200</span> <span class="o">&lt;=&gt;</span> <span class="s2">&quot;OK&quot;</span> <span class="k">for</span> <span class="nx">example</span>
+</pre></div>
+
+</code></pre><p>参见<a href="http://expressjs.com/4x/api.html#res.send">res.send()</a>。</p>
+<p>于是很明显，接下来我们无非是把文章内容从文件中读取出来，再res.send()一下就ok。</p>
+<p>查阅一下nodejs中<a href="http://nodejs.org/api/fs.html">与文件系统相关的api</a>，加上读取文件的代码后，app.js的内容如下：</p>
+<pre><code class="lang-js"><div class="highlight"><pre>    <span class="c1">//app.js</span>
+    <span class="kd">var</span> <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">();</span>
+
+
+    <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">&#39;./blogs/test.md&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+          <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+      <span class="p">});</span>
+    <span class="p">});</span>
+
+    <span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">3000</span><span class="p">);</span>
+</pre></div>
+
+</code></pre>
+<p>当然了，在运行前记得先创建blogs文件夹与test.md文件（随手写点内容咯，不然看不到效果）。</p>
+<p>编码完工~切换到终端，输入 <code>nodemon app.js</code>，我们来看一下是否成功读取了本博客的第一篇文章。</p>
+<blockquote>
+<p>哦对了，强烈推荐一个小工具 <a href="http://nodemon.io/">nodemon</a> 。一句话简介：全局安装了nodemon后，我们可以通过nodemon xxx.js的方式启动nodejs程序，而在此方式下启动的程序会自动侦测与本程序相关的文件，随时自动重启进程以反映最新的变化。实乃nodejs开发debug过程中必备利器！</p>
+</blockquote>
+<p>言归正传，我志得意满的打开chrome浏览器访问localhost:3000，意料中的文字却没有出现，反而弹出了一个文件下载询问框。shit！谁告诉我send()方法会自动推定Content-Type的！？打开网络侦测一看，果不其然，返回的Content-Type是 <code>application/octet-stream</code>。（经测试，在FireFox中同样提示下载文件，有点搞笑的是，IE11倒是老老实实的直接在页面显示了文件内容...IE大哥你怎么老跟别人不一样啊...）</p>
+<p>Well~我重新翻阅了nodejs的文档，对于<code>fs.readFile(path, callback (err, data))</code>的解释最后有一句话：</p>
+<blockquote>
+<p>If no encoding is specified, then the raw buffer is returned.</p>
+</blockquote>
+<p>得得~这就是看文档不仔细的后果。查阅上文表格可见，<code>buffer</code>对应的<code>content-type</code>确实是<code>application/octet-stream</code>来着，修改代码：</p>
+<pre><code><div class="highlight"><pre><span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">&#39;./blogs/test.md&#39;</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+      <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+
+</code></pre><p>刷新页面（nodemon已经在我们保存代码文件时自动重启： <code>[nodemon] restarting due to changes...</code>），当当~成功显示！啥？你说这个页面一点儿都不好看？不要在意这些细节...我们根本就是原样输出了markdown文件内容，连html都没转换，当然好看不了，稍安勿躁~</p>
+<p><strong>以上，我们建立了一个最简单的Hello, Express项目，介绍了package.json，express中的简单路由控制，<code>res.send()</code>，<code>fs.readFile()</code>，以此完成了一个读取本地文件显示到页面的功能。接下来，我们会在此基础上，完成一个自动检测所有指定格式的blog文件，并一一映射到对应URL的功能。</strong>
+<a name="3-2"><br></a></p>
+<h3 id="3-2-express-routing">3-2 Express中的Routing</h3>
+<p>很明显，我们的网站不会只有一篇博文，网站的首页也不应该直挺挺的就打印出一篇文章来。所以下一步是构思一下网站的路由结构，</p>
+<pre><code class="lang-bash"><div class="highlight"><pre>  <span class="p">|</span>-- Home
+  <span class="p">|</span>   <span class="p">|</span>--Blog
+  <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>--blogA
+  <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>--blogB
+  <span class="p">|</span>   <span class="p">|</span>   <span class="p">|</span>--blog...
+  <span class="p">|</span>   <span class="p">|</span>--xxx
+</pre></div>
+
+</code></pre>
+<p>那么，首页自然应该显示一个文章列表，点击文章后导向一个 <code>host/blog/xxxxx</code> 的url，显示对应文章的内容。相当常见的组织方式~</p>
+<p>有了上节的经验，我们很快就能写出类似于这样的代码：</p>
+<pre><code class="lang-js"><div class="highlight"><pre>  <span class="c1">//...</span>
+
+  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/blog/blogA&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="s1">&#39;./blogs/blogA.md&#39;</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+</pre></div>
+
+</code></pre>
+<p>以此类推，有两百篇文章就写上两百个这样的路由方法=。=</p>
+<p>当然不是这样...于是，为了可以批量读取到所有指定目录下的markdown文件，我们势必要给它订立一个标准的命名格式，比如：*.md，只要是markdown文件的我都认；不过或许我们可以把标准订的更严格一些。</p>
+<p>比如：模仿jekyll的默认命名格式： <code>yyyy-MM-dd-blog-title.md</code></p>
+<p>这样一来我们甚至可以依靠文件名就简单的为他们做一个按日期分组。或者直接就体现在url上，比如 <code>host/blog/2014/04/30/express-plus-nodejs-making-my-own-blog</code>。</p>
+<p>于是，我们的路由方法可以从两百个变成一个 ;)</p>
+<pre><code class="lang-js"><div class="highlight"><pre>  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/blog/:year/:month/:day/:title&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">fileName</span> <span class="o">=</span> 
+      <span class="s1">&#39;./blogs/&#39;</span> <span class="o">+</span>
+      <span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">year</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> 
+      <span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">month</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> 
+      <span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">day</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> 
+      <span class="nx">req</span><span class="p">.</span><span class="nx">params</span><span class="p">.</span><span class="nx">title</span> <span class="o">+</span> <span class="s1">&#39;.md&#39;</span><span class="p">;</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">readFile</span><span class="p">(</span><span class="nx">fileName</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+</pre></div>
+
+</code></pre>
+<p>这里我们认识了Express又一个十分方便的路由功能：唔..我不知道它叫啥，姑且称为<a href="http://expressjs.com/4x/api.html#req.params">命名请求参数</a>？总之，在 <code>app.verb(url, callback (req, res))</code>中的url上，我们可以使用 <code>:argname</code> 的形式为url的部分字符命名，然后通过<code>req.params.argname</code>获取，如上所示。</p>
+<p>确保建立了正确的文件夹与按规则命名的markdown文件后，启动程序访问一下看看咯~</p>
+<p>这样，利用  <code>yyyy-MM-dd-blog-title.md</code> 的命名规则，配合Express中的命名请求参数：形如 <code>/blog/:year/:month/:day/:title</code> 这样的url来解析指向相应的任意md文件。</p>
+<p>接下来要做的，就是从本地已有的文件反向得到该文件的url，以此生成一个文章列表供用户点击。</p>
+<pre><code class="lang-js"><div class="highlight"><pre>  <span class="kd">function</span> <span class="nx">getBlogList</span><span class="p">(</span><span class="nx">blogDir</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">fs</span><span class="p">.</span><span class="nx">readdir</span><span class="p">(</span><span class="nx">blogDir</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">files</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">var</span> <span class="nx">blogList</span> <span class="o">=</span> <span class="p">[];</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">files</span> <span class="o">&amp;&amp;</span> <span class="nx">files</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">files</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">filename</span><span class="p">)</span> <span class="p">{</span>
+            <span class="c1">//split file name and generate url...</span>
+            <span class="c1">//...</span>
+            <span class="c1">//create a blogItem { title: blogTitle, url: blogUrl }</span>
+            <span class="nx">blogList</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">blogItem</span><span class="p">);</span>
+          <span class="p">});</span>
+      <span class="p">}</span>
+      <span class="k">return</span> <span class="nx">blogList</span><span class="p">;</span>
+    <span class="p">});</span>
+  <span class="p">}</span>
+</pre></div>
+
+</code></pre>
+<p>限于篇幅，我去掉了关于文件名格式的正则验证，对文件名的解析生成url的过程（只是简单的截取字符串而已）等等细节的部分。总之，经过以上繁琐的字符串处理，我们最终得到了一个形如</p>
+<pre><code class="lang-js"><div class="highlight"><pre>  <span class="p">{[</span>
+    <span class="p">{</span> <span class="nx">title</span><span class="o">:</span> <span class="s1">&#39;blogA&#39;</span><span class="p">,</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;/blog/2014/04/01/blogA&#39;</span><span class="p">},</span>
+    <span class="p">{</span> <span class="nx">title</span><span class="o">:</span> <span class="s1">&#39;blogB&#39;</span><span class="p">,</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;/blog/2014/05/08/blogB&#39;</span><span class="p">},</span>
+    <span class="p">...</span>
+  <span class="p">]}</span>
+</pre></div>
+
+</code></pre>
+<p>这样的对象。</p>
+<p>于是我们就可以在首页显示所有文章的链接了：</p>
+<pre><code class="lang-js"><div class="highlight"><pre>  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">html</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">blogList</span> <span class="o">=</span> <span class="nx">getBlogList</span><span class="p">(</span><span class="s1">&#39;./blog&#39;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">blogList</span> <span class="o">&amp;&amp;</span> <span class="nx">blogList</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">blogList</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">blog</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">html</span> <span class="o">+=</span> <span class="s1">&#39;&lt;a href=&quot;&#39;</span><span class="o">+</span> <span class="nx">blog</span><span class="p">.</span><span class="nx">url</span> <span class="o">+</span><span class="s1">&#39;&quot;&gt;&#39;</span> <span class="o">+</span> <span class="nx">blog</span><span class="p">.</span><span class="nx">title</span> <span class="o">+</span> <span class="s1">&#39;&lt;/a&gt;&lt;br/&gt;&#39;</span><span class="p">;</span>
+      <span class="p">});</span>
+      <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">html</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="s1">&#39;No Blogs Found.&#39;</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">});</span>
+</pre></div>
+
+</code></pre>
+<p>大功告成~现在用户可以通过首页上的列表访问任意一篇存在于blog文件夹下且命名符合规则的文章了。
+<a name="3-3"><br></a></p>
+<h3 id="3-3-middleware">3-3 认识一下Middleware</h3>
+<p>终于来到了Express中，准确的说是<a href="https://github.com/senchalabs/connect">Connect</a>（Express的一个基础组件，当然也可以作为一个单独的框架使用，主要负责了中间件机制的实现）中激动人心的中间件部分。</p>
+<p>有关中间件的解释，参见 <a href="http://stephensugden.com/middleware_guide/">A short guide to Connect Middleware</a>。 我在这里就不多卖弄自己的浅薄见解了，简单来说，可以把中间件机制想像成一个层层过滤的污水处理系统（=。=抱歉，但是这是我第一个想到的比喻...）。<code>request</code>经过一个又一个的中间件，有的结束了处理<code>response</code>到了客户端，有的则继续流入下一个中间件。</p>
+<p>其实在我们之前的代码中，已经在无意中使用了这一特性：</p>
+<pre><code class="lang-js"><div class="highlight"><pre>  <span class="c1">//...</span>
+
+  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">){</span>
+    <span class="c1">//index page</span>
+  <span class="p">});</span>
+
+  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/blog/:year/:month/:day/:title&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">//blog page</span>
+  <span class="p">});</span>
+
+  <span class="c1">//...</span>
+</pre></div>
+
+</code></pre>
+<p><code>app.verb()</code>其在本质上就是一个带有高级路由功能的中间件，request自上而下首先来到<code>app.get(&#39;/&#39;)</code>，判断url是否匹配，匹配则进入处理方法，否则继续&quot;流向&quot;下一个中间件。</p>
+<p>那么，如果我们希望加上一个自定义的404 Not Found页面的话，应该如何利用中间件的这一特性呢？</p>
+<p>简单，只需要把它放在“过滤网”的最底层就好了：</p>
+<pre><code class="lang-js"><div class="highlight"><pre>  <span class="c1">//...</span>
+
+  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="p">...);</span>
+  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/blog/&#39;</span><span class="p">,</span> <span class="p">...);</span>
+  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/wiki/&#39;</span><span class="p">,</span> <span class="p">...);</span>
+  <span class="p">...</span>
+  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">res</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="mi">404</span><span class="p">,</span> <span class="s2">&quot;Oops! We didn&#39;t find it&quot;</span><span class="p">);</span>
+  <span class="p">});</span>
+</pre></div>
+
+</code></pre>
+<p>可以被解析匹配的请求路径在各自对应的中间件中被一一处理并返回了结果，剩下所有能够到达最底层的请求则是无法被已有路由解析的，于是返回404。</p>
+<p>简洁而自然的处理方式！</p>
+<p>而有的时候，一个请求在经过首个匹配的中间件处理后，我们可能还希望它继续行进到下一个匹配的中间件中去，在处理方法中显式使用<code>next()</code>即可。</p>
+<pre><code class="lang-js"><div class="highlight"><pre>  <span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">next</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">req</span><span class="p">.</span><span class="nx">method</span> <span class="o">+</span> <span class="s1">&#39;,&#39;</span> <span class="o">+</span> <span class="nx">req</span><span class="p">.</span><span class="nx">url</span><span class="p">);</span>
+    <span class="nx">next</span><span class="p">();</span>
+  <span class="p">});</span>
+
+  <span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="p">...);</span>
+
+  <span class="c1">//...</span>
+</pre></div>
+
+</code></pre>
+<p>关于中间件的介绍就到此为止，更多的知识及应用会在后面逐一提及。我们还是把重心放回到当前的项目中来。</p>
+<p>如今我们的网站已经可以将用户从主页导向至任意一篇文章，接下来就该把markdown文件正式转换为html的格式以供读者阅读了...</p>
+<p>第一篇结束，多谢观看。</p>
+<p>请！</p>
+<p>看！</p>
+<p>下！</p>
+<p>集！</p>
+<p>有没有点黑猫警长的范儿~ ;)</p>
