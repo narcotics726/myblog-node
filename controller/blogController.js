@@ -1,20 +1,16 @@
 var express = require('express');
+
 var _ = require('underscore');
 _.str = require('underscore.string');
-var marked = require('marked');
-var pygmentize = require('pygmentize-bundled');
-marked.setOptions({
-  highlight: function (code, lang, callback) {
-    require('pygmentize-bundled')({ lang: lang, format: 'html' }, code, function (err, result) {
-      callback(err, result.toString());
-    });
-  }
-});
+
 var fs = require('fs');
 var path = require('path');
-var webconfig = require('../webconfig');
+
+var lineReader = require('line-reader');
 
 var Blog = require('../model/blog');
+
+var fileHandler = require('../util/fileHandler');
 
 var blogRouter = express.Router();
 
@@ -24,19 +20,11 @@ blogRouter.use(function (req, res, next) {
 
 blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
   var blog = new Blog(req.params, 'reqParams');
-  var filePath = path.resolve(webconfig.blogdir, blog.fileName);
-  fs.exists(filePath, function (exists) {
-    if (exists) {
-      fs.readFile(filePath, 'utf-8', function (err, data) {
-        marked(data, function (err, content) {
-          if (err) {
-            throw err;
-          }
-          res.render('blog', { blog: { title: blog.title, content: content} });
-        });
-      });
+  fileHandler.getBlogContent(blog, function (err, content) {
+    if (err) {
+      next(err);
     } else {
-      next();
+      res.render('blog', { blog: { title: blog.title, content: content} });
     }
   });
 });

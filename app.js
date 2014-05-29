@@ -4,6 +4,7 @@ var path = require('path');
 var blogController = require('./controller/blogController');
 var app = express();
 var webconfig = require('./webconfig');
+
 app.engine('jade', require('jade').__express);
 
 app.set('views', webconfig.viewdir);
