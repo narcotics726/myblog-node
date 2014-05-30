@@ -17,17 +17,20 @@ var webconfig = require('../webconfig');
 
 //=============================================
 
+var lockList = [];
+
+
 function markdown2html(data, callback) {
+  var startTime = new Date().getTime();
   marked(data, function (err, content) {
+    console.log('md2html ok: ', new Date().getTime() - startTime);
     return callback(err, content);
   });
 }
 
 function writeHtmlCache(cacheFilePath, htmlContent) {
   fs.writeFile(cacheFilePath, htmlContent, 'utf-8', function (err) {
-    if (err) {
-      console.log(err);
-    }
+    if (err) { console.log(err); }
   });
 }
 
@@ -40,23 +43,30 @@ function getBlogContent(blog, callback) {
   fs.readFile(filePath, 'utf-8', function (err, data) {
     var h = crypto.createHash('md5');
     h.update(data);
-    var ret = h.digest('hex');
+    var fileHash = h.digest('hex');
 
-    var cachedHtmlFilePath = path.resolve(webconfig.blogCacheDir, ret);
+    var cachedHtmlFilePath = path.resolve(webconfig.blogCacheDir, fileHash);
     if (fs.existsSync(cachedHtmlFilePath)) {
-      fs.readFile(cachedHtmlFilePath, 'utf-8', function (err, data) {
-        return callback(err, data);
+      fs.readFile(cachedHtmlFilePath, 'utf-8', function (err2, data) {
+        return callback(err2, data);
       });
     } else {
       if (!fs.existsSync(webconfig.blogCacheDir)) {
         fs.mkdirSync(webconfig.blogCacheDir);
       }
       if (err) {  return callback(err, null); }
-      markdown2html(data, function (err2, content) {
-        if (err) { return callback(err2, null); }
-        writeHtmlCache(cachedHtmlFilePath, content);
-        return callback(null, content);
-      });
+      if (lockList.indexOf(fileHash) !== -1) {
+        console.log('locked!');
+        return getBlogContent(blog, callback);
+      } else {
+        lockList.push(fileHash);
+        markdown2html(data, function (err2, content) {
+          if (err) { return callback(err2, null); }
+          writeHtmlCache(cachedHtmlFilePath, content);
+          lockList.splice(lockList.indexOf(fileHash), 1);
+          return callback(null, content);
+        });
+      }
     }
   });
 }
