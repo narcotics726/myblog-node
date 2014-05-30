@@ -17,7 +17,7 @@ var webconfig = require('../webconfig');
 
 function markdown2html(data, callback) {
   marked(data, function (err, content) {
-    callback(err, content);
+    return callback(err, content);
   });
 }
 
@@ -36,27 +36,28 @@ function getBlogContent(blog, callback) {
   var filePath = path.resolve(webconfig.blogdir, blog.fileName);
 
   if (!fs.existsSync(filePath)) {
-    callback(null, null);
+    return callback(null, null);
   }
 
   if (fs.existsSync(cachedHtmlFilePath)) {
     fs.readFile(cachedHtmlFilePath, 'utf-8', function (err, data) {
-      callback(err, data);
+      return callback(err, data);
     });
-  } else if (!fs.existsSync(webconfig.blogCacheDir)) {
-    fs.mkdirSync(webconfig.blogCacheDir);
-
+  } else {
+    if (!fs.existsSync(webconfig.blogCacheDir)) {
+      fs.mkdirSync(webconfig.blogCacheDir);
+    }
     fs.readFile(filePath, 'utf-8', function (err, data) {
-      if (err) { callback(err, null); }
+      console.log('md file read end');
+      if (err) {  return callback(err, null); }
       markdown2html(data, function (err2, content) {
-        if (err) { callback(err2, null); }
+        if (err) { return callback(err2, null); }
         writeHtmlCache(cachedHtmlFilePath, content);
-        callback(null, content);
+        return callback(null, content);
       });
     });
   }
 }
 
 
-module.exports.markdown2html = markdown2html;
 module.exports.getBlogContent = getBlogContent;
