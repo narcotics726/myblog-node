@@ -20,25 +20,12 @@ app.use(function (req, res, next) {
 
 app.use('/public', express.static(webconfig.publicdir));
 
-/* router for /blog/\*
+/* router for /blog/
 */
 app.use('/blog', blogController);
 
 app.get('/', function (req, res, next) {
-  blogController.getBlogList(webconfig.blogdir, function (err, blogList) {
-    if (err) {
-      next(err);
-    } else {
-      if (blogList && blogList.length) {
-        blogList.forEach(function (blog) {
-          blog.url = blogController.getBlogUrl(blog);
-        });
-        res.render('home', { blogs: blogList });
-      } else {
-        res.send('No Blogs Found.');
-      }
-    }
-  });
+  res.redirect('/blog/list');
 });
 
 app.get('*', function (req, res, next) {

@@ -1,7 +1,11 @@
 link(rel='stylesheet', href='/public/style/blog.css')
 link(rel='stylesheet', href='/public/style/highlight.css')
 
+script(type='text/javascript').
+  function backToHome() { window.location.href = '/'; }
 
 h1
   = blog.title
 != blog.content
+
+a(href='javascript:void(0)' onclick='backToHome()') Back
