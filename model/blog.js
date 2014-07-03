@@ -18,7 +18,7 @@ function Blog(arg, argType) {
       this.blogdate.setTime(Date.parse(this.dateStr));
       this.dateYear = this.blogdate.getFullYear();
       this.dateMonth = _.str.pad(this.blogdate.getMonth() + 1, 2, '0');
-      this.dateDate = this.blogdate.getDate();
+      this.dateDate = _.str.pad(this.blogdate.getDate(), 2, '0');
       this.fileName = arg;
     } else {
       this.title = undefined;
