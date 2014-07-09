@@ -1,0 +1,12 @@
+link(rel='stylesheet', href='/public/style/blog.css')
+
+form(action='/blog/add', method='post')
+  label Title:
+  input(id='title', name='title')
+  br
+  input(id='addTime', readonly, value=new Date())
+  br
+  label Content:
+  br
+  textarea(id='content', name='content')
+  input(id='submit', type='submit')

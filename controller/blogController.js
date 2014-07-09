@@ -35,12 +35,22 @@ blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
       next(err);
     } else {
       if (content && content.length) {
-        res.render('blog', { blog: { title: blog.title, content: content} });
+        res.render('blog/index', { blog: { title: blog.title, content: content} });
       } else {
         next();
       }
     }
   });
+});
+
+blogRouter.get('/add', function (req, res, next) {
+  res.render('blog/add');
+});
+
+blogRouter.post('/add', function (req, res, next) {
+  var title = req.params.title;
+  var content = req.params.content;
+  console.log(title);
 });
 
 module.exports = blogRouter;

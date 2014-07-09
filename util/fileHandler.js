@@ -62,6 +62,7 @@ function getBlogContent(blog, callback) {
         lockList.push(fileHash);
         markdown2html(data, function (err2, content) {
           if (err) { return callback(err2, null); }
+          
           writeHtmlCache(cachedHtmlFilePath, content);
           lockList.splice(lockList.indexOf(fileHash), 1);
           return callback(null, content);
