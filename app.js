@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 
 var blogController = require('./controller/blogController');
+var adminContoller = require('./controller/adminController');
 var app = express();
 var webconfig = require('./webconfig');
 
@@ -23,6 +24,7 @@ app.use('/public', express.static(webconfig.publicdir));
 /* router for /blog/
 */
 app.use('/blog', blogController);
+app.use('/admin', adminContoller);
 
 app.get('/', function (req, res, next) {
   res.redirect('/blog/list');

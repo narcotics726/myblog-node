@@ -5,7 +5,9 @@ var config = {
   "blogCacheDir": "cached",
   "port": 18080,
   "publicdir": "public",
-  "viewdir": "view"
+  "viewdir": "view",
+  "admin": "nark",
+  "pwd": "200436"
 };
 
 module.exports.blogdir = path.resolve(__dirname, config.blogdir);
