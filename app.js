@@ -5,6 +5,7 @@ var blogController = require('./controller/blogController');
 var adminContoller = require('./controller/adminController');
 var app = express();
 var webconfig = require('./webconfig');
+var dropboxAuth = null;
 
 app.engine('jade', require('jade').__express);
 
@@ -27,7 +28,22 @@ app.use('/blog', blogController);
 app.use('/admin', adminContoller);
 
 app.get('/', function (req, res, next) {
-  res.redirect('/blog/list');
+  if (dropboxAuth) {
+    res.redirect('/blog/list');
+  } else {
+    res.redirect(require('./test/dropboxtest').authUrl);
+  }
+});
+
+app.get('/dropboxAuth', function (req, res, next) {
+  console.log(req.query);
+  dropboxAuth = req.query.code;
+  res.redirect('/');
+});
+
+app.get('/dropboxAuthClear', function (req, res, next) {
+  dropboxAuth = null;
+  res.redirect('/');
 });
 
 app.get('*', function (req, res, next) {
