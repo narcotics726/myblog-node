@@ -1,17 +1,30 @@
 var express = require('express');
 var path = require('path');
+var session = require('express-session');
+var bodyParser = require('body-parser');
+
+
 
 var blogController = require('./controller/blogController');
 var adminContoller = require('./controller/adminController');
 var app = express();
 var webconfig = require('./webconfig');
-var dropboxAuth = null;
 
 app.engine('jade', require('jade').__express);
 
 app.set('views', webconfig.viewdir);
 app.set('view engine', 'jade');
+app.use(bodyParser.json());
 
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+app.use(session({
+  secret: 'abc',
+  resave: true,
+  saveUninitialized: true
+}));
 
 /* mw for all request, just for logging
 */
@@ -26,24 +39,17 @@ app.use('/public', express.static(webconfig.publicdir));
 */
 app.use('/blog', blogController);
 app.use('/admin', adminContoller);
-
-app.get('/', function (req, res, next) {
-  if (dropboxAuth) {
-    res.redirect('/blog/list');
+app.use('/dropboxAuth', function (req, res, next) {
+  req.session.user = { Id: 'dp', DropboxCode: req.query.code };
+  if (req.session.originalUrl) {
+    res.redirect(req.session.originalUrl);
   } else {
-    res.redirect(require('./test/dropboxtest').authUrl);
+    res.redirect('/');
   }
 });
 
-app.get('/dropboxAuth', function (req, res, next) {
-  console.log(req.query);
-  dropboxAuth = req.query.code;
-  res.redirect('/');
-});
-
-app.get('/dropboxAuthClear', function (req, res, next) {
-  dropboxAuth = null;
-  res.redirect('/');
+app.get('/', function (req, res, next) {
+  res.redirect('/blog/list');
 });
 
 app.get('*', function (req, res, next) {
