@@ -39,13 +39,21 @@ app.use('/public', express.static(webconfig.publicdir));
 */
 app.use('/blog', blogController);
 app.use('/admin', adminContoller);
+
 app.use('/dropboxAuth', function (req, res, next) {
-  req.session.user = { Id: 'dp', DropboxCode: req.query.code };
-  if (req.session.originalUrl) {
-    res.redirect(req.session.originalUrl);
-  } else {
-    res.redirect('/');
-  }
+  require('./util/dropboxHelper').getToken(req.query.code, function (result, err) {
+    if (err) {
+      next(err);
+    } else {
+      req.session.user = { Id: 'dp', Token: result.access_token, Uid: result.uid };
+      console.log(req.session.user.Uid);
+      if (req.session.originalUrl) {
+        res.redirect(req.session.originalUrl);
+      } else {
+        res.redirect('/');
+      }
+    }
+  });
 });
 
 app.get('/', function (req, res, next) {
