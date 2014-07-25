@@ -1,4 +1,7 @@
 var http = require('http');
+var webconfig = require('../webconfig');
+
+var host = 'http://localhost:' + webconfig.port;
 
 var blogUrl = 'http://narcotics.duapp.com/blog/2014/04/21/node.js_+_express_%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2_1';
 

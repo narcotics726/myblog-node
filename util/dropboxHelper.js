@@ -1,16 +1,11 @@
 var https = require('https');
-
-var client = {
-  appKey: "ndd7wtqyiu0y4vb",
-  appSecret: "p4gqaj9sn2yjkol",
-  redirect_uri: "http://localhost:18080/dropboxAuth"
-};
+var dropboxCfg = require('../webconfig').dropBoxCfg;
 
 function getToken(code, callback) {
   var grant_type = 'authorization_code';
-  var client_id = client.appKey;
-  var client_secret = client.appSecret;
-  var redirect_uri = client.redirect_uri;
+  var client_id = dropboxCfg.appKey;
+  var client_secret = dropboxCfg.appSecret;
+  var redirect_uri = dropboxCfg.redirect_uri;
 
   var options = {
     hostname: 'api.dropbox.com',

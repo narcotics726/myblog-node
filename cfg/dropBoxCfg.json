@@ -1,0 +1,10 @@
+{
+  "url": "https://www.dropbox.com",
+  "api": "/1/oauth2/authorize",
+  "response_type": "code",
+  "client_id": "ndd7wtqyiu0y4vb",
+  "state": "narksdropboxapp",
+  "appKey": "ndd7wtqyiu0y4vb",
+  "appSecret": "p4gqaj9sn2yjkol",
+  "redirect_uri": "http://localhost:18080/dropboxAuth"
+}
