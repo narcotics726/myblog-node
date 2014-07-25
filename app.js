@@ -3,19 +3,18 @@ var path = require('path');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 
-
-
 var blogController = require('./controller/blogController');
 var adminContoller = require('./controller/adminController');
-var app = express();
+
 var webconfig = require('./webconfig');
 
-app.engine('jade', require('jade').__express);
+var app = express();
 
+app.engine('jade', require('jade').__express);
 app.set('views', webconfig.viewdir);
 app.set('view engine', 'jade');
-app.use(bodyParser.json());
 
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));

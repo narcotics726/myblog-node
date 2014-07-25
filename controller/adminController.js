@@ -36,11 +36,13 @@ adminRouter.post('/login', function (req, res, next) {
 adminRouter.get('/dpbxapi/:cmd', function (req, res, next) {
   switch (req.params.cmd) {
   case 'getcode':
-    console.log(req.session.user.DropboxCode);
+    console.log(req.session.user.Token);
     break;
   case 'accountInfo':
     console.log('accountInfo');
-    var url = "https://api.dropbox.com/1/account/info";
+    require('../util/dropboxHelper.js').getAccountInfo(req.session.user, 'zh-cn', function (result, err) {
+      console.log(result);
+    });
     break;
   default:
     console.log('no such cmd');
