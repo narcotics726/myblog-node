@@ -22,7 +22,9 @@ adminRouter.get('/login', function (req, res, next) {
   if (req.session.user) {
     res.redirect('/');
   } else {
-    res.render('admin/login', { dropboxAuthUri: require('../test/dropboxtest').authUrl });
+    var opt = require('../util/dropboxHelper').getHttpOptions('authorize', require('../webconfig').dropboxCfg);
+    var authorizeUri = 'https://' + opt.hostname + opt.path;
+    res.render('admin/login', { dropboxAuthUri: authorizeUri });
   }
 });
 

@@ -40,10 +40,19 @@ app.use('/blog', blogController);
 app.use('/admin', adminContoller);
 
 app.use('/dropboxAuth', function (req, res, next) {
-  require('./util/dropboxHelper').getToken(req.query.code, function (result, err) {
+  var dropboxCfg = require('./webconfig').dropboxCfg;
+  var args = {
+    code: req.query.code,
+    grant_type: 'authorization_code',
+    client_id: dropboxCfg.client_id,
+    client_secret: dropboxCfg.client_secret,
+    redirect_uri: dropboxCfg.redirect_uri
+  };
+  require('./util/dropboxHelper').invokeAPI('token', args, function (result, err) {
     if (err) {
       next(err);
     } else {
+      result = JSON.parse(result);
       req.session.user = { Id: 'dp', Token: result.access_token, Uid: result.uid };
       console.log(req.session.user.Uid);
       if (req.session.originalUrl) {
