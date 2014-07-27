@@ -1,0 +1,9 @@
+{
+  "blogdir": "blog",
+  "blogCacheDir": "cached",
+  "port": 18080,
+  "publicdir": "public",
+  "viewdir": "view",
+  "admin": "nark",
+  "pwd": "200436"
+}

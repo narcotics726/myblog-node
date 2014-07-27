@@ -1,15 +1,29 @@
 var express = require('express');
 var path = require('path');
+var session = require('express-session');
+var bodyParser = require('body-parser');
 
 var blogController = require('./controller/blogController');
-var app = express();
+var adminContoller = require('./controller/adminController');
+
 var webconfig = require('./webconfig');
 
-app.engine('jade', require('jade').__express);
+var app = express();
 
+app.engine('jade', require('jade').__express);
 app.set('views', webconfig.viewdir);
 app.set('view engine', 'jade');
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+
+app.use(session({
+  secret: 'abc',
+  resave: true,
+  saveUninitialized: true
+}));
 
 /* mw for all request, just for logging
 */
@@ -23,6 +37,32 @@ app.use('/public', express.static(webconfig.publicdir));
 /* router for /blog/
 */
 app.use('/blog', blogController);
+app.use('/admin', adminContoller);
+
+app.use('/dropboxAuth', function (req, res, next) {
+  var dropboxCfg = require('./webconfig').dropboxCfg;
+  var args = {
+    code: req.query.code,
+    grant_type: 'authorization_code',
+    client_id: dropboxCfg.client_id,
+    client_secret: dropboxCfg.client_secret,
+    redirect_uri: dropboxCfg.redirect_uri
+  };
+  require('./util/dropboxHelper').invokeAPI('token', args, function (result, err) {
+    if (err) {
+      next(err);
+    } else {
+      result = JSON.parse(result);
+      req.session.user = { Id: 'dp', Token: result.access_token, Uid: result.uid };
+      console.log(req.session.user.Uid);
+      if (req.session.originalUrl) {
+        res.redirect(req.session.originalUrl);
+      } else {
+        res.redirect('/');
+      }
+    }
+  });
+});
 
 app.get('/', function (req, res, next) {
   res.redirect('/blog/list');

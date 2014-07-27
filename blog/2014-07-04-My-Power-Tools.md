@@ -1,0 +1,12 @@
+- Everything
+- Ditto
+- Chocolatey
+- Chrome
+- 7zip
+- Git(Git Extensions)
+- SublimeText
+- Visual Studio(Resharper)
+- MacType
+- LICEcap
+- Beyond Compare
+- Space Sniffer
