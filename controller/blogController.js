@@ -12,7 +12,11 @@ blogRouter.use(function (req, res, next) {
 });
 
 blogRouter.get('/list', function (req, res, next) {
-  blogHelper.getBlogList(webconfig.blogdir, function (err, blogList) {
+  var getListArg = {
+    argType: 'dirPath',
+    blogDir: webconfig.blogdir
+  };
+  blogHelper.getBlogList(getListArg, function (err, blogList) {
     if (err) {
       next(err);
     } else {

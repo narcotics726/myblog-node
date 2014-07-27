@@ -8,7 +8,7 @@ var webconfig = require('../webconfig');
 match the regax or the constructor 
 will return a instance with undefined title
 **/
-function Blog(arg, argType) {
+function Blog(arg, argType, location) {
   if (argType === 'filename') {
     var regPattern = /^[0-9]{4}-[0-9]{2}-[0-9]{2}-.{1,}\.md$/;
     if (arg !== null && arg.search(regPattern) !== -1) {
@@ -30,6 +30,7 @@ function Blog(arg, argType) {
     this.title = arg.title;
     this.fileName = _.str.sprintf('%(dateYear)s-%(dateMonth)s-%(dateDate)s-%(title)s.md', this);
   }
+  this.location = location;
 }
 
 module.exports = Blog;
