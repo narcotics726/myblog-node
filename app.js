@@ -1,6 +1,7 @@
 var express = require('express');
 var path = require('path');
 var session = require('express-session');
+var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var blogController = require('./controller/blogController');
@@ -13,6 +14,8 @@ var app = express();
 app.engine('jade', require('jade').__express);
 app.set('views', webconfig.viewdir);
 app.set('view engine', 'jade');
+
+app.use(cookieParser());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
@@ -29,6 +32,14 @@ app.use(session({
 */
 app.use(function (req, res, next) {
   console.log(req.url);
+  if (req.cookies) {
+    console.log(req.cookies);
+  }
+  if (!req.session.user && req.cookies.user) {
+    console.log('cookie found: ' + req.cookies.user);
+    var user = JSON.parse(req.cookies.user);
+    req.session.user = { token: user.token, uid: user.uid };
+  }
   next();
 });
 
@@ -54,7 +65,7 @@ app.use('/dropboxAuth', function (req, res, next) {
     } else {
       result = JSON.parse(result);
       req.session.user = { id: 'dp', token: result.access_token, uid: result.uid };
-      console.log(req.session.user.uid);
+      res.cookie('user', JSON.stringify(req.session.user));
       if (req.session.originalUrl) {
         res.redirect(req.session.originalUrl);
       } else {

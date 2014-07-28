@@ -18,7 +18,6 @@ dateMonth, dateDate}
 **/
 function getBlogListLocal(args, callback) {
   var blogDir = args.blogDir;
-  console.log('dir' + blogDir);
   fs.readdir(blogDir, function (err, files) {
     if (files && files.length) {
       try {
@@ -82,7 +81,6 @@ function getBlogListDropbox(args, callback) {
 function getBlogList(args, callback) {
   switch (args.argType) {
   case 'dirPath':
-    console.log('dir');
     return getBlogListLocal(args, callback);
   case 'token':
     return getBlogListDropbox(args, callback);
