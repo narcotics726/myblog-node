@@ -44,34 +44,38 @@ function getBlogListDropbox(args, callback) {
     path: 'Blogs',
     token: args.token,
     file_limit: '',
-    hash: args.lastHash,
+    hash: '',
     list: 'true',
     include_deleted: '',
     rev: '',
     locale: '',
     include_media_info: '',
   };
-  dropboxHelper.invokeAPI('metadata', optArg, function (result, err) {
+  dropboxHelper.invokeAPI('metadata', optArg, function (err, result) {
     if (err) {
-      return callback(null, err);
+      return callback(err, null);
     }
 
     result = JSON.parse(result);
     if (result.error) {
-      return callback(null, new Error(result.error));
+      return callback(new Error(result.error), null);
     }
     var blogList = [];
+    console.log('b' + result.contents.length);
     result.contents.forEach(function (item) {
-      if (_.endsWith(item.path)) {
+      console.log(item.path);
+      console.log(result.path.length);
+      if (_.str.endsWith(item.path, 'md')) {
         //e.g: reuslt.path = '/blogs', the contents item's path will be '/blogs/filename'
         var fileName = item.path.slice(result.path.length + 1);
+        console.log(fileName);
         var blogItem = new Blog(fileName, 'filename', 'dropbox');
         if (blogItem.title !== undefined) {
           blogList.push(blogItem);
         }
       }
     });
-    return callback(blogList, null);
+    return callback(null, blogList);
   });
 }
 

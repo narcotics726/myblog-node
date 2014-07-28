@@ -28,7 +28,7 @@ var apiOptTable = {
   //metadata
   metadata: {
     hostname: 'api.dropbox.com',
-    path: '/1/metadata/auto/$(path)s?access_token=%(token)s&file_limit=%(file_limit)s&hash=%(hash)s&list=%(list)s&include_deleted=%(include_deleted)s&rev=%(rev)s&locale=%(locale)s&include_media_info=%(include_media_info)s',
+    path: '/1/metadata/auto/%(path)s?access_token=%(token)s&file_limit=%(file_limit)s&hash=%(hash)s&list=%(list)s&include_deleted=%(include_deleted)s&rev=%(rev)s&locale=%(locale)s&include_media_info=%(include_media_info)s',
     method: 'GET',
     port: 443
   },
@@ -50,13 +50,13 @@ function invokeAPI(api, args, callback) {
     res.on('data', function (chunk) { result += chunk; });
     res.on('end', function () {
       console.log(result);
-      callback(result, null);
+      callback(null, result);
     });
   });
   req.write('');
   req.end();
   req.on('error', function (err) {
-    callback(null, err);
+    callback(err, null);
   });
 }
 

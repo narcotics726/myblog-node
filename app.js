@@ -48,13 +48,13 @@ app.use('/dropboxAuth', function (req, res, next) {
     client_secret: dropboxCfg.client_secret,
     redirect_uri: dropboxCfg.redirect_uri
   };
-  require('./util/dropboxHelper').invokeAPI('token', args, function (result, err) {
+  require('./util/dropboxHelper').invokeAPI('token', args, function (err, result) {
     if (err) {
       next(err);
     } else {
       result = JSON.parse(result);
-      req.session.user = { Id: 'dp', Token: result.access_token, Uid: result.uid };
-      console.log(req.session.user.Uid);
+      req.session.user = { id: 'dp', token: result.access_token, uid: result.uid };
+      console.log(req.session.user.uid);
       if (req.session.originalUrl) {
         res.redirect(req.session.originalUrl);
       } else {
