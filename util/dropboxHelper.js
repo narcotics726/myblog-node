@@ -38,7 +38,14 @@ var apiOptTable = {
     path: '/1/files/auto/%(path)s?access_token=%(token)s&rev=%(rev)s',
     method: 'GET',
     port: 443
-  }
+  },
+  //tokenflowAuth
+  authorize_token: {
+    hostname: 'www.dropbox.com',
+    path: '/1/oauth2/authorize?response_type=token&client_id=%(client_id)s&redirect_uri=%(redirect_uri)s',
+    method: 'GET',
+    port: 443
+  },
 };
 
 function getHttpOptions(api, args) {
@@ -65,6 +72,29 @@ function invokeAPI(api, args, callback) {
   req.on('error', function (err) {
     callback(err, null);
   });
+}
+
+function getToken(callback) {
+  var cfgPath = require('path').resolve(__dirname, '../cfg/dropboxCfg.json');
+  require('fs').readFile(cfgPath, 'utf-8', function (err, data) {
+    var cfg = '';
+    try {
+      cfg = JSON.parse(data);
+      if (cfg.token && cfg.token.length) {
+        callback(null, cfg.token);
+      } else {
+        var arg = {
+          client_id: cfg.client_id
+        };
+        invokeAPI(arg, 'authorize_token', function (err2, result) {
+          return callback(new Error('func not impl'));
+        });
+      }
+    } catch (ex) {
+      callback(ex, null);
+    }
+  });
+  // body...
 }
 
 module.exports.invokeAPI = invokeAPI;

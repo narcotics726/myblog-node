@@ -35,6 +35,12 @@ adminRouter.post('/login', function (req, res, next) {
   return res.redirect('/');
 });
 
+adminRouter.get('/logout', function (req, res, next) {
+  req.session.user = null;
+  res.cookie('user', '');
+  return res.redirect('/');
+});
+
 adminRouter.get('/dpbxapi/:cmd', function (req, res, next) {
   switch (req.params.cmd) {
   case 'getcode':

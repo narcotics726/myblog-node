@@ -13,18 +13,10 @@ blogRouter.use(function (req, res, next) {
 
 blogRouter.get('/list', function (req, res, next) {
   var getListArg = {};
-  if (req.session.user) {
-    getListArg = {
-      argType: 'token',
-      token: req.session.user.token,
-      lasthash: ''
-    };
-  } else {
-    getListArg = {
-      argType: 'dirPath',
-      blogDir: webconfig.blogdir
-    };
-  }
+  getListArg = {
+    argType: 'dirPath',
+    blogDir: webconfig.blogdir
+  };
   blogHelper.getBlogList(getListArg, function (err, blogList) {
     if (err) {
       next(err);

@@ -32,9 +32,6 @@ app.use(session({
 */
 app.use(function (req, res, next) {
   console.log(req.url);
-  if (req.cookies) {
-    console.log(req.cookies);
-  }
   if (!req.session.user && req.cookies.user) {
     console.log('cookie found: ' + req.cookies.user);
     var user = JSON.parse(req.cookies.user);
