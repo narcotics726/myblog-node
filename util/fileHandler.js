@@ -34,7 +34,7 @@ function writeHtmlCache(cacheFilePath, htmlContent) {
   });
 }
 
-function getBlogContent(blog, callback) {
+function getBlogContentLocal(blog, callback) {
   var filePath = path.resolve(webconfig.blogdir, blog.fileName);
   if (!fs.existsSync(filePath)) {
     return callback(null, null);
@@ -57,20 +57,42 @@ function getBlogContent(blog, callback) {
       if (err) {  return callback(err, null); }
       if (lockList.indexOf(fileHash) !== -1) {
         console.log('locked!');
-        return getBlogContent(blog, callback);
-      } else {
-        lockList.push(fileHash);
-        markdown2html(data, function (err2, content) {
-          if (err) { return callback(err2, null); }
-          
-          writeHtmlCache(cachedHtmlFilePath, content);
-          lockList.splice(lockList.indexOf(fileHash), 1);
-          return callback(null, content);
-        });
+        return getBlogContentLocal(blog, callback);
       }
+      //no lock on cache
+      lockList.push(fileHash);
+      markdown2html(data, function (err2, content) {
+        if (err) { return callback(err2, null); }
+        writeHtmlCache(cachedHtmlFilePath, content);
+        lockList.splice(lockList.indexOf(fileHash), 1);
+        return callback(null, content);
+      });
     }
   });
 }
 
+function getBlogContentDropbox(blog, callback) {
+  var apiArg = {
+    path: 'blogs/' + blog.fileName,
+    token: blog.token,
+    rev: ''
+  };
+  require('./dropboxHelper').invokeAPI('files', apiArg, function (err, data) {
+    markdown2html(data, function (err2, content) {
+      return callback(null, content);
+    });
+  });
+}
+
+function getBlogContent(blog, callback) {
+  if (blog.location) {
+    switch (blog.location) {
+    case 'local':
+      return getBlogContentLocal(blog, callback);
+    case 'dropbox':
+      return getBlogContentDropbox(blog, callback);
+    }
+  }
+}
 
 module.exports.getBlogContent = getBlogContent;
