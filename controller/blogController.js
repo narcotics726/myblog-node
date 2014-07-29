@@ -42,7 +42,8 @@ blogRouter.get('/list', function (req, res, next) {
 });
 
 blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
-  var blog = new Blog(req.params, 'reqParams');
+  var blog = new Blog(req.params, 'reqParams', req.query.l);
+  blog.token = req.session.user.token;
   fileHandler.getBlogContent(blog, function (err, content) {
     if (err) {
       next(err);

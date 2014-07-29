@@ -23,7 +23,7 @@ function getBlogListLocal(args, callback) {
       try {
         var blogList = [];
         files.forEach(function (filename) {
-          var blogItem = new Blog(filename, 'filename');
+          var blogItem = new Blog(filename, 'filename', 'local');
           if (blogItem.title !== undefined) {
             blogList.push(blogItem);
           }
@@ -92,7 +92,7 @@ function getBlogList(args, callback) {
 
 
 function getBlogUrl(blog) {
-  return _.str.sprintf('/blog/%(dateYear)s/%(dateMonth)s/%(dateDate)s/%(title)s', blog);
+  return _.str.sprintf('/blog/%(dateYear)s/%(dateMonth)s/%(dateDate)s/%(title)s?l=%(location)s', blog);
 }
 
 

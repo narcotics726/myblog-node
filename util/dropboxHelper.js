@@ -32,6 +32,13 @@ var apiOptTable = {
     method: 'GET',
     port: 443
   },
+  //get file
+  files: {
+    hostname: 'api-content.dropbox.com',
+    path: '/1/files/auto/%(path)s?access_token=%(token)s&rev=%(rev)s',
+    method: 'GET',
+    port: 443
+  }
 };
 
 function getHttpOptions(api, args) {
