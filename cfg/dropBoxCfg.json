@@ -5,5 +5,6 @@
   "client_id": "ndd7wtqyiu0y4vb",
   "state": "narksdropboxapp",
   "client_secret": "p4gqaj9sn2yjkol",
-  "redirect_uri": "http://localhost:18080/dropboxAuth"
+  "redirect_uri": "http://localhost:18080/dropboxAuth",
+  "token": "yQvSrFDOkPYAAAAAAAAAgTk8NlGPfk_H82Nn3ktCWbXkFcRAx2PHRHfPqmhsK26R"
 }

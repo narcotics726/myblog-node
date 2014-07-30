@@ -81,21 +81,15 @@ function getToken(callback) {
     try {
       cfg = JSON.parse(data);
       if (cfg.token && cfg.token.length) {
-        callback(null, cfg.token);
-      } else {
-        var arg = {
-          client_id: cfg.client_id
-        };
-        invokeAPI(arg, 'authorize_token', function (err2, result) {
-          return callback(new Error('func not impl'));
-        });
+        return callback(null, cfg.token);
       }
+      return callback(null, null);
     } catch (ex) {
-      callback(ex, null);
+      return callback(ex, null);
     }
   });
-  // body...
 }
 
 module.exports.invokeAPI = invokeAPI;
 module.exports.getHttpOptions = getHttpOptions;
+module.exports.getToken = getToken;

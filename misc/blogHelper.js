@@ -80,11 +80,11 @@ function getBlogListDropbox(args, callback) {
 
 function getBlogList(args, callback) {
   switch (args.argType) {
-  case 'dirPath':
+    case 'dirPath':
     return getBlogListLocal(args, callback);
-  case 'token':
+    case 'token':
     return getBlogListDropbox(args, callback);
-  default:
+    default:
     return callback(new Error('wrong getList argType', null));
   }
 }

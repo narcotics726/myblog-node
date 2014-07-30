@@ -15,6 +15,8 @@ var crypto = require('crypto');
 
 var webconfig = require('../webconfig');
 
+var dropboxHelper = require('../util/dropboxHelper');
+
 //=============================================
 
 var lockList = [];
@@ -77,10 +79,41 @@ function getBlogContentDropbox(blog, callback) {
     token: blog.token,
     rev: ''
   };
-  require('./dropboxHelper').invokeAPI('files', apiArg, function (err, data) {
-    markdown2html(data, function (err2, content) {
-      return callback(null, content);
-    });
+  var metadataArg = {
+    path: 'blogs/' + blog.fileName,
+    token: blog.token,
+    file_limit: '',
+    hash: '',
+    list: 'true',
+    include_deleted: '',
+    rev: '',
+    locale: '',
+    include_media_info: '',
+  };
+  dropboxHelper.invokeAPI('metadata', metadataArg, function (err, result) {
+    if (err) {
+      return callback(err, null);
+    } else {
+      result = JSON.parse(result);
+      if (result.rev) {
+        var cachedHtmlFilePath = path.resolve(webconfig.blogCacheDir, result.rev);
+        if (fs.existsSync(cachedHtmlFilePath)) {
+          fs.readFile(cachedHtmlFilePath, 'utf-8', function (err2, data) {
+            return callback(err2, data);
+          });
+        } else {
+          if (!fs.existsSync(webconfig.blogCacheDir)) {
+            fs.mkdirSync(webconfig.blogCacheDir);
+          }
+          dropboxHelper.invokeAPI('files', apiArg, function (err, data) {
+            markdown2html(data, function (err2, content) {
+              writeHtmlCache(cachedHtmlFilePath, content);
+              return callback(null, content);
+            });
+          });
+        }
+      }
+    }
   });
 }
 

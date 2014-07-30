@@ -13,38 +13,55 @@ blogRouter.use(function (req, res, next) {
 
 blogRouter.get('/list', function (req, res, next) {
   var getListArg = {};
-  getListArg = {
-    argType: 'dirPath',
-    blogDir: webconfig.blogdir
-  };
-  blogHelper.getBlogList(getListArg, function (err, blogList) {
+  require('../util/dropboxHelper').getToken(function (err, token) {
     if (err) {
       next(err);
+    } else if (token) {
+      getListArg = {
+        argType: 'token',
+        token: token
+      };
     } else {
-      if (blogList && blogList.length) {
-        blogList.forEach(function (blog) {
-          blog.url = blogHelper.getBlogUrl(blog);
-        });
-        res.render('home', { blogs: blogList });
-      } else {
-        res.send('No Blogs Found.');
-      }
+      getListArg = {
+        argType: 'dirPath',
+        blogDir: webconfig.blogdir
+      };
     }
+    blogHelper.getBlogList(getListArg, function (err, blogList) {
+      if (err) {
+        next(err);
+      } else {
+        if (blogList && blogList.length) {
+          blogList.forEach(function (blog) {
+            blog.url = blogHelper.getBlogUrl(blog);
+          });
+          res.render('home', { blogs: blogList });
+        } else {
+          res.send('No Blogs Found.');
+        }
+      }
+    });
   });
 });
 
 blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
   var blog = new Blog(req.params, 'reqParams', req.query.l);
-  blog.token = req.session.user.token;
-  fileHandler.getBlogContent(blog, function (err, content) {
+  require('../util/dropboxHelper').getToken(function (err, token) {
     if (err) {
       next(err);
-    } else {
-      if (content && content.length) {
-        res.render('blog/index', { blog: { title: blog.title, content: content} });
-      } else {
-        next();
-      }
+    } else if (token) {
+      blog.token = token;
+      fileHandler.getBlogContent(blog, function (err2, content) {
+        if (err2) {
+          next(err2);
+        } else {
+          if (content && content.length) {
+            res.render('blog/index', { blog: { title: blog.title, content: content} });
+          } else {
+            next();
+          }
+        }
+      });
     }
   });
 });
