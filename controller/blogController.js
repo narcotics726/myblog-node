@@ -15,30 +15,24 @@ blogRouter.get('/list', function (req, res, next) {
   var getListArg = {};
   require('../util/dropboxHelper').getToken(function (err, token) {
     if (err) {
-      next(err);
-    } else if (token) {
-      getListArg = {
-        argType: 'token',
-        token: token
-      };
+      return next(err);
+    }
+    if (token) {
+      getListArg = { argType: 'token', token: token };
     } else {
-      getListArg = {
-        argType: 'dirPath',
-        blogDir: webconfig.blogdir
-      };
+      getListArg = { argType: 'dirPath', blogDir: webconfig.blogdir };
     }
     blogHelper.getBlogList(getListArg, function (err, blogList) {
       if (err) {
-        next(err);
+        return next(err);
+      }
+      if (blogList && blogList.length) {
+        blogList.forEach(function (blog) {
+          blog.url = blogHelper.getBlogUrl(blog);
+        });
+        res.render('home', { blogs: blogList });
       } else {
-        if (blogList && blogList.length) {
-          blogList.forEach(function (blog) {
-            blog.url = blogHelper.getBlogUrl(blog);
-          });
-          res.render('home', { blogs: blogList });
-        } else {
-          res.send('No Blogs Found.');
-        }
+        res.send('No Blogs Found.');
       }
     });
   });
@@ -46,23 +40,13 @@ blogRouter.get('/list', function (req, res, next) {
 
 blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
   var blog = new Blog(req.params, 'reqParams', req.query.l);
-  require('../util/dropboxHelper').getToken(function (err, token) {
-    if (err) {
-      next(err);
-    } else if (token) {
-      blog.token = token;
-      fileHandler.getBlogContent(blog, function (err2, content) {
-        if (err2) {
-          next(err2);
-        } else {
-          if (content && content.length) {
-            res.render('blog/index', { blog: { title: blog.title, content: content} });
-          } else {
-            next();
-          }
-        }
-      });
+  fileHandler.getBlogContent(blog, function (err, content) {
+    if (err) { return next(err); }
+    if (content && content.length) {
+      var renderArg = { blog: { title: blog.title, content: content } };
+      return res.render('blog/index', renderArg);
     }
+    return next();
   });
 });
 
