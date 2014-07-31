@@ -13,12 +13,10 @@ function Blog(arg, argType, location) {
     var regPattern = /^[0-9]{4}-[0-9]{2}-[0-9]{2}-.{1,}\.md$/;
     if (arg !== null && arg.search(regPattern) !== -1) {
       this.dateStr = arg.substring(0, 10);
+      this.dateYear = this.dateStr.slice(0, 4);
+      this.dateMonth = this.dateStr.slice(5, 7);
+      this.dateDate = this.dateStr.slice(-2);
       this.title = arg.substring(11, arg.lastIndexOf('.'));
-      this.blogdate = new Date();
-      this.blogdate.setTime(Date.parse(this.dateStr));
-      this.dateYear = this.blogdate.getFullYear();
-      this.dateMonth = _.str.pad(this.blogdate.getMonth() + 1, 2, '0');
-      this.dateDate = _.str.pad(this.blogdate.getDate(), 2, '0');
       this.fileName = arg;
     } else {
       this.title = undefined;

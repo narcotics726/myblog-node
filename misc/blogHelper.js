@@ -63,7 +63,6 @@ function getBlogListDropbox(args, callback) {
     console.log('b' + result.contents.length);
     result.contents.forEach(function (item) {
       console.log(item.path);
-      console.log(result.path.length);
       if (_.str.endsWith(item.path, 'md')) {
         //e.g: reuslt.path = '/blogs', the contents item's path will be '/blogs/filename'
         var fileName = item.path.slice(result.path.length + 1);

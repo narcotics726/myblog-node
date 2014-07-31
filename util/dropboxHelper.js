@@ -36,7 +36,7 @@ function invokeAPI(api, args, callback) {
     }
     args.token = token;
     var options = getHttpOptions(api, args);
-    console.log(options.path);
+    console.log('invokeAPI: ', options.path);
     var req = https.request(options, function (res) {
       var result = '';
       res.on('data', function (chunk) { result += chunk; });

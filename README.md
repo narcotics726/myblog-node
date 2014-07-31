@@ -9,6 +9,8 @@ Roadmap
 - 2014.07.30 add dropbox support
 - next
     - watch the dropbox token usage/expire time
-    - add cache mechanism for blog list, to decrease the dropbox api invoke times
-    - add pagination for blog list
+        - one day's passed and it's ok for the moment
     - add category/tag for blogs
+    - add pagination for blog list
+    - add cache mechanism for blog list, to decrease the dropbox api invoke times
+        - delay, after put the project into production env.
