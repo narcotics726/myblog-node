@@ -31,7 +31,7 @@ app.use(session({
 /* mw for all request, just for logging
 */
 app.use(function (req, res, next) {
-  console.log(req.url);
+  console.log(req.method + ':' + req.url);
   next();
 });
 
@@ -42,7 +42,7 @@ app.use('/public', express.static(webconfig.publicdir));
 app.use('/blog', blogController);
 
 app.get('/', function (req, res, next) {
-  res.redirect('/blog/list');
+  res.redirect('/blog');
 });
 
 app.get('*', function (req, res, next) {

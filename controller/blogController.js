@@ -11,7 +11,7 @@ blogRouter.use(function (req, res, next) {
   next();
 });
 
-blogRouter.get('/list', function (req, res, next) {
+blogRouter.get('/', function (req, res, next) {
   var getListArg = {};
   require('../util/dropboxHelper').getToken(function (err, token) {
     if (err) {
@@ -57,7 +57,6 @@ blogRouter.get('/add', function (req, res, next) {
 blogRouter.post('/add', function (req, res, next) {
   var title = req.params.title;
   var content = req.params.content;
-  console.log(title);
 });
 
 module.exports = blogRouter;

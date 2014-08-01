@@ -41,7 +41,7 @@ function invokeAPI(api, args, callback) {
       var result = '';
       res.on('data', function (chunk) { result += chunk; });
       res.on('end', function () {
-        console.log(result);
+        console.log('invokeAPI-Result: ' + result);
         callback(null, result);
       });
     });

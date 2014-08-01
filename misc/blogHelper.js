@@ -60,13 +60,10 @@ function getBlogListDropbox(args, callback) {
       return callback(new Error(result.error), null);
     }
     var blogList = [];
-    console.log('b' + result.contents.length);
     result.contents.forEach(function (item) {
-      console.log(item.path);
       if (_.str.endsWith(item.path, 'md')) {
         //e.g: reuslt.path = '/blogs', the contents item's path will be '/blogs/filename'
         var fileName = item.path.slice(result.path.length + 1);
-        console.log(fileName);
         var blogItem = new Blog(fileName, 'filename', 'dropbox');
         if (blogItem.title !== undefined) {
           blogList.push(blogItem);

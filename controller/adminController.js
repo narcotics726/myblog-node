@@ -41,20 +41,4 @@ adminRouter.get('/logout', function (req, res, next) {
   return res.redirect('/');
 });
 
-adminRouter.get('/dpbxapi/:cmd', function (req, res, next) {
-  switch (req.params.cmd) {
-  case 'getcode':
-    console.log(req.session.user.Token);
-    break;
-  case 'accountInfo':
-    console.log('accountInfo');
-    require('../util/dropboxHelper.js').getAccountInfo(req.session.user, 'zh-cn', function (result, err) {
-      console.log(result);
-    });
-    break;
-  default:
-    console.log('no such cmd');
-  }
-});
-
 module.exports = adminRouter;
