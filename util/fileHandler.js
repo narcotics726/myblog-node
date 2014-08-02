@@ -11,6 +11,9 @@ marked.setOptions({
   }
 });
 
+var _ = require('underscore');
+_.str = require('underscore.string');
+
 var crypto = require('crypto');
 
 var webconfig = require('../webconfig');
@@ -21,12 +24,51 @@ var dropboxHelper = require('../util/dropboxHelper');
 
 var lockList = [];
 
+function getBlogHeader(data) {
+  data = _.str.trim(data);
+  var blogHeaderHtml = '';
+  try {
+    if (data[0] === '{') {
+      var bracePairStack = [];
+      var lastBraceOnBlogHeader = -1;
+      var i = 0;
+      var currentChar;
+      for (i = 0; i < data.length; i++) {
+        currentChar = data.charAt(i);
+        if (currentChar === '{') {
+          bracePairStack.push('brace');
+        } else if (currentChar === '}') {
+          bracePairStack.pop();
+          if (bracePairStack.length === 0) {
+            lastBraceOnBlogHeader = i;
+            break;
+          }
+        }
+      }
+      if (lastBraceOnBlogHeader !== -1) {
+        var blogHeader = JSON.parse(data.slice(0, lastBraceOnBlogHeader + 1));
+        data = data.slice(lastBraceOnBlogHeader + 2);
+        blogHeaderHtml = _.str.sprintf('<p>Category: %(category)s</p>', blogHeader);
+        return { header: blogHeaderHtml, data: data };
+      }
+    }
+  } catch (ex) {
+    console.log('get blog header err: ' + ex.stack);
+    return '';
+  }
+}
 
 function markdown2html(data, callback) {
   var startTime = new Date().getTime();
+  var blogHeader = getBlogHeader(data);
+  var blogHeaderHtml = '';
+  if (blogHeader) {
+    data = blogHeader.data;
+    blogHeaderHtml = blogHeader.header;
+  }
   marked(data, function (err, content) {
     console.log('md2html ok: ', new Date().getTime() - startTime);
-    return callback(err, content);
+    return callback(err, blogHeaderHtml + content);
   });
 }
 
@@ -120,9 +162,9 @@ function getBlogContentDropbox(blog, callback) {
 function getBlogContent(blog, callback) {
   if (blog.location) {
     switch (blog.location) {
-    case 'local':
+      case 'local':
       return getBlogContentLocal(blog, callback);
-    case 'dropbox':
+      case 'dropbox':
       return getBlogContentDropbox(blog, callback);
     }
   }

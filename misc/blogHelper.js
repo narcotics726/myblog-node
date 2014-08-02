@@ -7,15 +7,6 @@ var dropboxHelper = require('../util/dropboxHelper');
 
 var Blog = require('../model/blog');
 
-
-/** @method getBlogList
-@param files {array} array of file names(
-no path, and in specific form like 
-'yyyy-MM-dd-blogname.md')
-@return {array} array of 
-BlogItem{dateStr, title, blogdate, dateYear, 
-dateMonth, dateDate}
-**/
 function getBlogListLocal(args, callback) {
   var blogDir = args.blogDir;
   fs.readdir(blogDir, function (err, files) {
@@ -87,8 +78,6 @@ function getBlogList(args, callback) {
     return callback(new Error('wrong getList argType', null));
   }
 }
-
-
 
 function getBlogUrl(blog) {
   return _.str.sprintf('/blog/%(dateYear)s/%(dateMonth)s/%(dateDate)s/%(title)s?l=%(location)s', blog);
