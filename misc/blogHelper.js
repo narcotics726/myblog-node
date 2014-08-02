@@ -60,6 +60,9 @@ function getBlogListDropbox(args, callback) {
       return callback(new Error(result.error), null);
     }
     var blogList = [];
+    if (!result.contents) {
+      return callback(new Error('no content in blog dir result'), null);
+    }
     result.contents.forEach(function (item) {
       if (_.str.endsWith(item.path, 'md')) {
         //e.g: reuslt.path = '/blogs', the contents item's path will be '/blogs/filename'
