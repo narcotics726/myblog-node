@@ -12,6 +12,7 @@
         "pygmentize-bundled": "*",
         "marked": "*",
         "crypto": "*",
-        "eventproxy": "*"
+        "eventproxy": "*",
+        "mongodb": "*"
     }
 }
