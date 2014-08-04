@@ -1,49 +1,16 @@
-var http = require('http');
-var webconfig = require('../webconfig');
+var Db = require('mongodb').Db;
+var Server = require('mongodb').Server;
+var assert = require('assert');
 
-var host = 'http://localhost:' + webconfig.port;
+var db = new Db('myblog-node', new Server('localhost', 27017), { w: 1});
 
-var blogUrl = 'http://narcotics.duapp.com/blog/2014/04/21/node.js_+_express_%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2_1';
-
-var startTime = new Date().getTime();
-
-
-http.get(blogUrl, function (res) {
-  console.log('ok1', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok2', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok3', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok4', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok5', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok6', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok7', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok8', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok9', new Date().getTime() - startTime);
-});
-
-http.get(blogUrl, function (res) {
-  console.log('ok10', new Date().getTime() - startTime);
+db.open(function (err, db) {
+  var collection = db.collection('blog');
+  collection.insert({ title: 'my-first-blog', author: 'Nark' }, {w: 1}, function (err, result) {
+    collection.findOne({ title: 'my-first-blog' }, function (err, item) {
+      assert.equal(null, err);
+      assert.equal('Nark', item.author);
+      db.close();
+    });
+  });
 });
