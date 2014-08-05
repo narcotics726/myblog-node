@@ -10,6 +10,7 @@ Roadmap
 - 2014.08.03 watch the dropbox token usage/expire time, it's ok for the moment
 - next
     - add category/tag for blogs
+    - add image in articles support
     - add pagination for blog list
     - add cache mechanism for blog list, to decrease the dropbox api invoke times
         - delay, after put the project into production env. cuz the dropbox's webhook func need a public ip

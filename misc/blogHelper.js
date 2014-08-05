@@ -14,7 +14,7 @@ function getBlogListLocal(args, callback) {
       try {
         var blogList = [];
         files.forEach(function (filename) {
-          var blogItem = new Blog(filename, 'filename', 'local');
+          var blogItem = new Blog(filename, 'filename', 'l');
           if (blogItem.title !== undefined) {
             blogList.push(blogItem);
           }
@@ -31,7 +31,7 @@ function getBlogListLocal(args, callback) {
 
 function getBlogListDropbox(args, callback) {
   var optArg = {
-    path: 'Blogs',
+    path: 'blogs',
     token: args.token,
     file_limit: '',
     hash: '',
@@ -58,7 +58,7 @@ function getBlogListDropbox(args, callback) {
       if (_.str.endsWith(item.path, 'md')) {
         //e.g: reuslt.path = '/blogs', the contents item's path will be '/blogs/filename'
         var fileName = item.path.slice(result.path.length + 1);
-        var blogItem = new Blog(fileName, 'filename', 'dropbox');
+        var blogItem = new Blog(fileName, 'filename', 'dp');
         if (blogItem.title !== undefined) {
           blogList.push(blogItem);
         }
@@ -80,7 +80,8 @@ function getBlogList(args, callback) {
 }
 
 function getBlogUrl(blog) {
-  return _.str.sprintf('/blog/%(dateYear)s/%(dateMonth)s/%(dateDate)s/%(title)s?l=%(location)s', blog);
+  var dateStrWithSlashes = blog.dateStr.replace(/-/g, '/');
+  return '/blog/' + dateStrWithSlashes + _.str.sprintf('/%(title)s?l=%(location)s', blog);
 }
 
 

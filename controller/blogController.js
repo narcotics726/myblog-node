@@ -5,6 +5,7 @@ var Blog = require('../model/blog');
 
 var fileHandler = require('../util/fileHandler');
 var blogHelper = require('../misc/blogHelper');
+var dropboxHelper = require('../util/dropboxHelper');
 var webconfig = require('../webconfig');
 
 blogRouter.use(function (req, res, next) {
@@ -13,10 +14,8 @@ blogRouter.use(function (req, res, next) {
 
 blogRouter.get('/', function (req, res, next) {
   var getListArg = {};
-  require('../util/dropboxHelper').getToken(function (err, token) {
-    if (err) {
-      return next(err);
-    }
+  dropboxHelper.getToken(function (err, token) {
+    if (err) { return next(err); }
     if (token) {
       getListArg = { argType: 'token', token: token };
     } else {

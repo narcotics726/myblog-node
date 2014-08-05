@@ -162,9 +162,9 @@ function getBlogContentDropbox(blog, callback) {
 function getBlogContent(blog, callback) {
   if (blog.location) {
     switch (blog.location) {
-      case 'local':
+      case 'l':
       return getBlogContentLocal(blog, callback);
-      case 'dropbox':
+      case 'dp':
       return getBlogContentDropbox(blog, callback);
     }
   }

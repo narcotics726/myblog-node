@@ -8,6 +8,13 @@ var apiOptTable = require('../cfg/dropboxAPITable');
 function getHttpOptions(api, args) {
   var opt = apiOptTable[api];
   if (opt) {
+    //prevent the originPath overwritten by the newer one,
+    //restore it everytime before using it again
+    if (opt.originPath) {
+      opt.path = opt.originPath;
+    } else {
+      opt.originPath = opt.path;
+    }
     opt.path = _.str.sprintf(opt.path, args);
   }
   return opt;
