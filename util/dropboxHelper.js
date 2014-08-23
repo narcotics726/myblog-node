@@ -36,6 +36,16 @@ function getToken(callback) {
   });
 }
 
+/*
+** this func is fired when dropbox give us notification
+** it only knows that there ARE files have been changed
+** but doesnt know WHAT have been changed
+** so we'll call /delta to make it clear
+*/
+function onNotificated() {
+  //call /delta api, get to know what files have been changed
+}
+
 function invokeAPI(api, args, callback) {
   getToken(function (err, token) {
     if (err) {

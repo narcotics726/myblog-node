@@ -1,5 +1,5 @@
 var express = require('express');
-var blogRouter = express.Router();
+var router = express.Router();
 
 var Blog = require('../model/blog');
 
@@ -8,11 +8,11 @@ var blogHelper = require('../misc/blogHelper');
 var dropboxHelper = require('../util/dropboxHelper');
 var webconfig = require('../webconfig');
 
-blogRouter.use(function (req, res, next) {
+router.use(function (req, res, next) {
   next();
 });
 
-blogRouter.get('/', function (req, res, next) {
+router.get('/', function (req, res, next) {
   var getListArg = {};
   dropboxHelper.getToken(function (err, token) {
     if (err) { return next(err); }
@@ -37,7 +37,7 @@ blogRouter.get('/', function (req, res, next) {
   });
 });
 
-blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
+router.get('/:year/:month/:day/:title', function (req, res, next) {
   var blog = new Blog(req.params, 'reqParams', req.query.l);
   fileHandler.getBlogContent(blog, function (err, content) {
     if (err) { return next(err); }
@@ -49,13 +49,13 @@ blogRouter.get('/:year/:month/:day/:title', function (req, res, next) {
   });
 });
 
-blogRouter.get('/add', function (req, res, next) {
+router.get('/add', function (req, res, next) {
   res.render('blog/add');
 });
 
-blogRouter.post('/add', function (req, res, next) {
+router.post('/add', function (req, res, next) {
   var title = req.params.title;
   var content = req.params.content;
 });
 
-module.exports = blogRouter;
+module.exports = router;
