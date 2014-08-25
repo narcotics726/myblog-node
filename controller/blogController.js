@@ -13,27 +13,21 @@ router.use(function (req, res, next) {
 });
 
 router.get('/', function (req, res, next) {
-  var getListArg = {};
-  dropboxHelper.getToken(function (err, token) {
-    if (err) { return next(err); }
-    if (token) {
-      getListArg = { argType: 'token', token: token };
-    } else {
-      getListArg = { argType: 'dirPath', blogDir: webconfig.blogdir };
+  var getListArg = {
+    blogLocation: 'dropbox'
+  };
+  blogHelper.getBlogList(getListArg, function (err, blogList) {
+    if (err) {
+      return next(err);
     }
-    blogHelper.getBlogList(getListArg, function (err, blogList) {
-      if (err) {
-        return next(err);
-      }
-      if (blogList && blogList.length) {
-        blogList.forEach(function (blog) {
-          blog.url = blogHelper.getBlogUrl(blog);
-        });
-        res.render('home', { blogs: blogList });
-      } else {
-        res.send('No Blogs Found.');
-      }
-    });
+    if (blogList && blogList.length) {
+      blogList.forEach(function (blog) {
+        blog.url = blogHelper.getBlogUrl(blog);
+      });
+      res.render('home', { blogs: blogList });
+    } else {
+      res.send('No Blogs Found.');
+    }
   });
 });
 

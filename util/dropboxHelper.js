@@ -36,21 +36,9 @@ function getToken(callback) {
   });
 }
 
-/*
-** this func is fired when dropbox give us notification
-** it only knows that there ARE files have been changed
-** but doesnt know WHAT have been changed
-** so we'll call /delta to make it clear
-*/
-function onNotificated() {
-  //call /delta api, get to know what files have been changed
-}
-
 function invokeAPI(api, args, callback) {
   getToken(function (err, token) {
-    if (err) {
-      return callback(err, null);
-    }
+    if (err) { return callback(err, null); }
     args.token = token;
     var options = getHttpOptions(api, args);
     console.log('invokeAPI: ', options.path);
@@ -70,8 +58,45 @@ function invokeAPI(api, args, callback) {
   });
 }
 
+/*
+** this func is fired when dropbox give us notification
+** it only knows that there ARE files have been changed
+** but doesnt know WHAT have been changed
+** so we'll call /delta to make it clear
+*/
+function onNotified(callback) {
+  //call /delta api, get to know what files have been changed
+  var lastDeltaCursor = '';
+  var currentBlogListRev = '';
+  var args = {
+    cursor: lastDeltaCursor,
+    locale: '',
+    path_prefix: 'blogs',
+    include_media_info: 'false'
+  };
+  invokeAPI('delta', args, function (err, result) {
+    if (err) { return callback(err); }
+    result = JSON.parse(result);
+    if (!result.entries || result.entries.length === 0) {
+      return callback('');
+    }
+    var i = 0;
+    var item = {};
+    for (i = 0; i < result.entries.length; i++) {
+      item = result.entries[i];
+      if (item[0] === '/blogs') {
+        if (item[1].rev !== currentBlogListRev) {
+          updateBlogListCache(item);
+          break;
+        }
+      }
+    }
+    return callback('');
+  });
+}
 
 
 module.exports.invokeAPI = invokeAPI;
 module.exports.getHttpOptions = getHttpOptions;
 module.exports.getToken = getToken;
+module.exports.onNotificated = onNotificated;
