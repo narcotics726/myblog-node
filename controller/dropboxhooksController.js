@@ -31,13 +31,9 @@ router.post('/', function (req, res, next) {
     //but actually our system is a single-user sys, 
     //so we dont need to do anything with that, just judge if this list is empty, 
     //then do what we should do
-    dropboxHelper.onNotified(function (err, result) {
-      if (err) { return next(err); }
-      return res.send(result);
-    });
-  } else {
-    return res.send('');
+    dropboxHelper.onNotified();
   }
+  return res.send('');
 });
 
 module.exports = router;
