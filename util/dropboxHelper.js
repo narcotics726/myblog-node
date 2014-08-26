@@ -58,6 +58,12 @@ function invokeAPI(api, args, callback) {
   });
 }
 
+var schema = require('../schema/schema');
+
+function updateBlogListCache(cursor) {
+  var list = new schema.BlogList();
+}
+
 /*
 ** this func is fired when dropbox give us notification
 ** it only knows that there ARE files have been changed
@@ -81,15 +87,19 @@ function onNotified() {
     }
     var i = 0;
     var item = {};
-    for (i = 0; i < result.entries.length; i++) {
-      item = result.entries[i];
-      if (item[0] === '/blogs' && item[1].rev !== currentBlogListRev) {
-        //we don't concern about the delta's other detail
-        //now we know that our blogs dir's content have been changed
-        //it means that there are files added/deleted in blogs dir
-        //so it's time to update our cached blog list
-        //and don't forget to update the delta cursor as well
-        updateBlogListCache(result.cursor);
+    var hasMore = true;
+    while (hasMore) {
+      for (i = 0; i < result.entries.length; i++) {
+        item = result.entries[i];
+        if (item[0] === '/blogs' && item[1].rev !== currentBlogListRev) {
+          //we don't concern about the delta's other detail
+          //now we know that our blogs dir's content have been changed
+          //it means that there are files added/deleted in blogs dir
+          //so it's time to update our cached blog list
+          //and don't forget to update the delta cursor as well
+          return updateBlogListCache(result.cursor);
+        }
+        hasMore = result.has_more;
       }
     }
   });
