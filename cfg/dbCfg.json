@@ -1,0 +1,6 @@
+{
+    "db": "mongodb",
+    "name": "myblog-node",
+    "host": "localhost",
+    "port": 27017
+}

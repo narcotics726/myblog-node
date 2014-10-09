@@ -1,16 +1,20 @@
-var Db = require('mongodb').Db;
-var Server = require('mongodb').Server;
-var assert = require('assert');
+var db = require('../util/dbHelper');
 
-var db = new Db('myblog-node', new Server('localhost', 27017), { w: 1});
+var Blog = db.model('Blog', { name: String });
 
-db.open(function (err, db) {
-  var collection = db.collection('blog');
-  collection.insert({ title: 'my-first-blog', author: 'Nark' }, {w: 1}, function (err, result) {
-    collection.findOne({ title: 'my-first-blog' }, function (err, item) {
-      assert.equal(null, err);
-      assert.equal('Nark', item.author);
-      db.close();
-    });
-  });
+var first = new Blog({ name: 'First' });
+
+first.save(function (err) {
+  if (err) { return console.error(err); }
+  console.log('ok');
+});
+
+first.save(function (err) {
+  if (err) { return console.error(err); }
+  console.log('ok');
+});
+
+first.save(function (err) {
+  if (err) { return console.error(err); }
+  console.log('ok');
 });

@@ -29,10 +29,10 @@ function getBlogListLocal(args, callback) {
   });
 }
 
-function getBlogListDropbox(args, callback) {
+function getBlogListDropbox(callback) {
   var optArg = {
     path: 'blogs',
-    token: args.token,
+    token: '',
     file_limit: '',
     hash: '',
     list: 'true',
@@ -42,9 +42,7 @@ function getBlogListDropbox(args, callback) {
     include_media_info: '',
   };
   dropboxHelper.invokeAPI('metadata', optArg, function (err, result) {
-    if (err) {
-      return callback(err, null);
-    }
+    if (err) { return callback(err, null); }
 
     result = JSON.parse(result);
     if (result.error) {
@@ -69,11 +67,15 @@ function getBlogListDropbox(args, callback) {
 }
 
 function getBlogList(args, callback) {
-  switch (args.argType) {
+  var blogListCache = null;
+  if (blogListCache) {
+    return getBlogListCache(callback);
+  }
+  switch (args.blogLocation) {
     case 'dirPath':
-    return getBlogListLocal(args, callback);
-    case 'token':
-    return getBlogListDropbox(args, callback);
+    return getBlogListLocal(callback);
+    case 'dropbox':
+    return getBlogListDropbox(callback);
     default:
     return callback(new Error('wrong getList argType', null));
   }

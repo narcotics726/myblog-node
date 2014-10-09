@@ -38,9 +38,7 @@ function getToken(callback) {
 
 function invokeAPI(api, args, callback) {
   getToken(function (err, token) {
-    if (err) {
-      return callback(err, null);
-    }
+    if (err) { return callback(err, null); }
     args.token = token;
     var options = getHttpOptions(api, args);
     console.log('invokeAPI: ', options.path);
@@ -60,8 +58,55 @@ function invokeAPI(api, args, callback) {
   });
 }
 
+var schema = require('../schema/schema');
+
+function updateBlogListCache(cursor) {
+  var list = new schema.BlogList();
+}
+
+/*
+** this func is fired when dropbox give us notification
+** it only knows that there ARE files have been changed
+** but doesnt know WHAT have been changed
+** so we'll call /delta to make it clear
+*/
+function onNotified() {
+  //call /delta api, get to know what files have been changed
+  var lastDeltaCursor = '';
+  var currentBlogListRev = '';
+  var args = {
+    cursor: lastDeltaCursor,
+    locale: '',
+    path_prefix: '/blogs',
+    include_media_info: 'false'
+  };
+  invokeAPI('delta', args, function (err, result) {
+    result = JSON.parse(result);
+    if (!result.entries || result.entries.length === 0) {
+      return;
+    }
+    var i = 0;
+    var item = {};
+    var hasMore = true;
+    while (hasMore) {
+      for (i = 0; i < result.entries.length; i++) {
+        item = result.entries[i];
+        if (item[0] === '/blogs' && item[1].rev !== currentBlogListRev) {
+          //we don't concern about the delta's other detail
+          //now we know that our blogs dir's content have been changed
+          //it means that there are files added/deleted in blogs dir
+          //so it's time to update our cached blog list
+          //and don't forget to update the delta cursor as well
+          return updateBlogListCache(result.cursor);
+        }
+        hasMore = result.has_more;
+      }
+    }
+  });
+}
 
 
 module.exports.invokeAPI = invokeAPI;
 module.exports.getHttpOptions = getHttpOptions;
 module.exports.getToken = getToken;
+module.exports.onNotified = onNotified;

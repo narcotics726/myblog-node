@@ -78,6 +78,7 @@ function writeHtmlCache(cacheFilePath, htmlContent) {
   });
 }
 
+//deprecated
 function getBlogContentLocal(blog, callback) {
   var filePath = path.resolve(webconfig.blogdir, blog.fileName);
   if (!fs.existsSync(filePath)) {
